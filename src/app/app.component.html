@@ -1,0 +1,51 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+<!-- Toolbar -->
+<div class="toolbar" role="banner">
+  <span>Covid data browser</span>
+</div>
+
+<div class="sidebar" role="navigation">
+    <ul>
+        <li class='sidebarElement'>
+            <div class='sidebarElementName' (click)='onClick("country")'>Countries</div>
+            <ul>
+                <div class='countryList' *ngIf='menuSelection === "country"'>
+                    <button type='button' (click)='selectDefault()'>Select default</button>
+                    <button type='button' (click)='deselectAll()'>Deselect all</button>
+
+                    <li [class.selected]='selectedCountryList.has(countryName)' class='sidebarSubelement' (click) = 'setCountry(countryName)' *ngFor='let countryName of countryNames'>
+                        {{countryName}}
+                    </li>
+                </div>
+            </ul>
+        </li>
+        <li class='sidebarElement' (click)='onClick("options")'>
+            <div class='sidebarElementName'>Options</div>
+        </li>
+    </ul>
+</div>
+
+<div class="content" role="main">
+    <select>
+        <option *ngFor="let d of dataTypes" value="{{d}}" (click)='setDataType(d)'>{{d}}</option>
+    </select>
+    <select>
+        <option *ngFor="let g of graphTypes" value="{{g}}" (click)='setGraphType(g)'>{{g}}</option>
+    </select>
+    <!--
+    <mat-checkbox>
+        Per Capita
+    </mat-checkbox>
+    <mat-form-field>
+        <mat-label>Data type</mat-label>
+        <mat-select>
+            <mat-option *ngFor="let d of dataTypes" value="{{d}}">{{d}}</mat-option>
+        </mat-select>
+    </mat-form-field>
+    -->
+
+    <canvas id="myChart"></canvas>
+</div>
+
+<router-outlet></router-outlet>
