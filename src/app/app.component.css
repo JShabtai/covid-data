@@ -33,122 +33,55 @@ p {
     flex: 1;
 }
 
-.toolbar {
+.testContainer{
+    display: flex;
+    flex-direction: column;
     position: absolute;
-
     top: 0;
+    bottom: 0;
     left: 0;
     right: 0;
-    height: 60px;
-    
-    padding-left: 15px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #336633;
-    color: #ddffdd;
-    font-size: 19pt;
-    font-weight: 400;
 }
 
-.toolbar img {
-    margin: 0 16px;
+.mat-checkbox {
+    margin-left: 15px;
 }
-
-.toolbar #twitter-logo {
-    height: 40px;
-    margin: 0 16px;
-}
-
-.toolbar #twitter-logo:hover {
-    opacity: 0.8;
-}
-.sidebar {
-    position: absolute;
-    top: 60px;
-    left: 0;
-    right: 0;
-    height: 100%;
-    max-height: 92%;
-    width: 250px;
-
-    display: flex;
-
-    align-items: top;
-
-    background-color: #ccffcc;
-    color: #333333;
-
-    font-weight: 600;
-
-    margin: 0;
-    padding:0;
-
-    overflow: scroll;
-}
-
-#sidebar:hover {
-    overflow-y: auto;
-}
-
-.sidebarElementName {
+.mat-form-field {
     margin-left: 15px;
 }
 
-.sidebar ul {
-    padding: 0;
-    margin: 0;
-    width: 100%;
+.search {
+    position: sticky;
+    padding-top: 10px;
+    top: 0;
+    float: initial;
+    z-index: 10;
+    background-color: white;
 }
 
-.sidebarSubelement {
-    background: #eeeeee;
-    font-size: 12pt;
-    margin: 0;
-    padding: 5px 0px 5px 15px;
-    width: 100% - 10px;
-    color: #222222;
+.testbar {
+    resize: none;
 }
 
-.sidebarSubelement:hover {
-    background: #cccccc;
+.selectionButton {
+    margin-left: 15px;
+
+}
+.sidenavContainer {
+    flex: 1;
 }
 
-.sidebarSubelement.selected {
-    background: #cccccc;
-}
-
-.sidebarElement {
-    list-style-type: none;
-    font-size: 20pt;
-    padding: 0;
-    margin-top: 10px;
-    margin-right: 0;
-    margin-left: 0;
-    margin-bottom: 0;
-    width: 100%;
+.toolbar {
 }
 
 .content {
     position: relative;
     top: 0;
-    display: flex;
-    margin: 82px auto 32px;
-    padding: 0 16px;
-    max-width: 1260px;
-    flex-direction: column;
+    margin: 50px 20px 32px 50px;
+    padding: 25px;
+    max-width: calc(100% - 320px);
+    max-height: 100%;
     align-items: center;
     background: #eee;
 }
 
-a,
-a:visited,
-a:hover {
-    color: #1976d2;
-    text-decoration: none;
-}
-
-a:hover {
-    color: #125699;
-}

@@ -23,12 +23,15 @@ export class AppComponent {
   title = 'covid-data';
 
   public static readonly chartColours = [
-      'rgb(220,100, 100)',
-      'rgb(120,200, 100)',
-      'rgb(120,100, 200)',
+      'rgb(255,80, 80)',
+      'rgb(100,200, 100)',
+      'rgb(75,75, 255)',
       'rgb(220,100, 200)',
       'rgb(120,200, 200)',
       'rgb(220,200, 100)',
+      'rgb(150,95, 95)',
+      'rgb(36,130, 36)',
+      'rgb(25,25, 115)',
   ];
 
   public countries: {[country: string]: Dataset} = {};
@@ -39,7 +42,7 @@ export class AppComponent {
 
   public menuSelection = MenuSelection.Country ;
   public menuOpen = true;
-  public selectedCountryList: Set<string> = new Set();
+  public selectedCountryList: string[] = [];
   public selectedCountries: Dataset[] = [];
 
   public headers: string[];
@@ -50,6 +53,10 @@ export class AppComponent {
 
   public graphTypes: string[] = ['Daily', 'Change', 'Ratio'];
   public graphType: string = this.graphTypes[0].toLowerCase();
+  public offset100: boolean = true;
+
+  public perCapita: boolean = true;
+  public selectedOptions;
 
   public populationData: {
       [country: string]: number;
@@ -90,6 +97,7 @@ export class AppComponent {
           for (let region of this.regionNames) {
               this.addCountryData(this.regions[region]);
           }
+          // this.countries[' Ontario'].population = 13448494;
 
           // These names don't line up nicely between the two sources, manually map them
           this.countries["US"].population = this.populationData['United States'];
@@ -126,12 +134,14 @@ export class AppComponent {
           this.selectDefault();
 
           let global = new Dataset();
+          global.population = 0;
           global.name = ' Global';
           global.country = ' Global';
           global.province = ' Global';
           global.dates = this.countries[this.countryNames[0]].dates;
           for (let country of this.countryNames) {
               global.addDataset(this.countries[country]);
+              global.population += this.countries[country].population;
           }
 
           this.countries[global.name] = global;
@@ -175,21 +185,38 @@ export class AppComponent {
       this.countries[dataset.country].addDataset(dataset);
   }
 
-  public setCountry(x) {
-      if (this.selectedCountries.some(country => country.name === x)) {
-          this.selectedCountries = this.selectedCountries.filter(country => country.name !== x);
-          this.selectedCountryList.delete(x);
-      }
-      else {
-          this.selectedCountries.push(this.countries[x]);
-          this.selectedCountryList.add(x);
-      }
+  // public setCountry(x, updateChart: boolean = true) {
+  //     console.log(this.selectedOptions);
+  //     if (this.selectedCountries.some(country => country.name === x)) {
+  //         this.selectedCountries = this.selectedCountries.filter(country => country.name !== x);
+  //         this.selectedCountryList.delete(x);
+  //     }
+  //     else {
+  //         this.selectedCountries.push(this.countries[x]);
+  //         this.selectedCountryList.add(x);
+  //     }
 
-      this.updateChart();
-  }
+  //     if (updateChart) {
+  //         this.updateChart();
+  //     }
+  // }
 
   public updateChart() {
-      const plots = this.selectedCountries.map(c => c.getData(this.graphType, this.dataType, 7));
+      const plots = this.selectedCountryList.map(c => this.countries[c].getData(this.graphType, this.dataType, {
+          smoothingFactor: 7,
+          perCapita: this.perCapita,
+          offset100: this.offset100,
+      }));
+      let xLabels = plots.length > 0 ? plots[0].xAxisLabels : [];
+
+      if (this.offset100) {
+          for (let plot of plots) {
+              if (plot.xAxisLabels.length > xLabels.length) {
+                  xLabels = plot.xAxisLabels;
+              }
+          }
+      }
+
       const canvas = <HTMLCanvasElement> document.getElementById("myChart");
       const ctx = canvas.getContext("2d");
 
@@ -203,11 +230,12 @@ export class AppComponent {
 
           // The data for our dataset
           data: {
-              labels: plots.length > 0 ? plots[0].xAxisLabels : [],
+              labels: xLabels,
               datasets: plots.map((country, index) => {
                   return {
                       label: country.name,
                       borderColor: AppComponent.chartColours[index % AppComponent.chartColours.length],
+                      fill: false,
                       data: country.yAxisData
                   };
               }),
@@ -253,33 +281,45 @@ export class AppComponent {
       }
   }
 
-  public setDataType(x: string) {
-      this.dataType = x.toLowerCase();
-      this.updateChart();
-  }
-
-  public setGraphType(x: string) {
-      this.graphType = x.toLowerCase();
-      this.updateChart();
-  }
-
   public selectDefault() {
-      this.selectedCountries = [];
-      this.selectedCountryList = new Set();
-
-      this.setCountry('Canada');
-      this.setCountry('US');
-      this.setCountry('Italy');
-      this.setCountry('Spain');
-      this.setCountry('United Kingdom');
-      this.setCountry('France');
+      // Must be alphabetical order or colours will be shuffled once the sidebar is used
+      this.selectedCountryList = [
+          'Canada',
+          'France',
+          'Italy',
+          'Spain',
+          'US',
+          'United Kingdom',
+      ].sort();
 
       this.updateChart();
   }
 
   public deselectAll() {
-      this.selectedCountries = [];
-      this.selectedCountryList = new Set();
+      this.selectedCountryList = [];
       this.updateChart();
+  }
+
+  // TODO Use binding
+  public setPerCapita(event) {
+      this.perCapita = event.checked;
+      this.updateChart();
+  }
+
+  // TODO Use binding
+  public setOffset100(event) {
+      this.offset100 = event.checked;
+      this.updateChart();
+  }
+
+  // TODO Preserve order of array. Maybe one way binding and update with this event?
+  public onNgModelChange(event) {
+      console.log(event);
+      this.updateChart()
+  }
+  public searchCountries(search: string): string[] {
+      return this.countryNames.filter((country) => {
+          return (country.toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) >= 0);
+      });
   }
 }

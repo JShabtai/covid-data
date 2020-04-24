@@ -1,3 +1,13 @@
+export interface Options {
+    perCapita: boolean;
+    smoothingFactor: number;
+
+    /**
+     * If true, the returned data starts from the day that 100 cases were reached
+     */
+    offset100: boolean;
+}
+
 export interface GraphingData {
     xAxisName: string;
     yAxisName: string;
@@ -16,12 +26,21 @@ export class Dataset {
     private static readonly longitudeColumn = 3;
     private static readonly dataStartColumn = 4;
 
+    public subregions: Dataset[] = [];
 
     public country: string;
     public province: string;
     public name: string;
     public latitude: number;
     public longitude: number;
+
+    public totalConfirmed = 0;
+    public daysTo100 = 0;
+
+    /**
+     * TODOs
+     * * Doubling time (log(2)/log(average growth over last 7 days))
+     */
 
     public dates: string[];
     public data: {
@@ -53,15 +72,31 @@ export class Dataset {
 
     public addData(dataType: string, header: string[], record: string[]) {
         this.data[dataType] = record.slice(Dataset.dataStartColumn).map(count => Number(count));
-        this.computeActive()
+        this.analyze()
     }
 
-    public computeActive() {
+    /**
+     * Perform certain analysis if all data is now present:
+     * - Active cases
+     * - Total confirmed cases
+     * - Number of days to 100 cases
+     */
+    public analyze() {
         if (this.data['confirmed'] && this.data['recovered'] && this.data['deaths']) {
             this.data['active'] = [...this.data['confirmed']];
             for (let i = 0; i < this.data['active'].length; i++) {
                 this.data['active'][i] -= this.data['recovered'][i];
                 this.data['active'][i] -= this.data['deaths'][i];
+            }
+
+            this.totalConfirmed = this.data['confirmed'][this.data['confirmed'].length - 1]
+
+            this.daysTo100 = this.data['confirmed'].length;
+            for (let i = 0; i < this.data['confirmed'].length; i++) {
+                if (this.data['confirmed'][i] >= 100) {
+                    this.daysTo100 = i;
+                    break;
+                }
             }
         }
     }
@@ -91,75 +126,94 @@ export class Dataset {
             }
         }
 
-        this.computeActive();
+        this.analyze();
 
         this.province = '';
+        this.subregions.push(dataset);
     }
-    public getRatiosSmooth(dataType: string, factor: number): GraphingData {
+    public getRatiosSmooth(dataType: string, options: Options): GraphingData {
         const workingData = this.data[dataType] || [];
         let ratios = [];
-        for (let i = factor; i < workingData.length; i++) {
+        for (let i = options.smoothingFactor; i < workingData.length; i++) {
             ratios.push(100 * (
                 Math.pow(
-                    workingData[i]/workingData[i-factor],
-                    1/factor
+                    workingData[i]/workingData[i-options.smoothingFactor],
+                    1/options.smoothingFactor
                 ) - 1));
         }
         return {
             xAxisName: 'Date',
             yAxisName: 'Percent increase (%)',
-            chartName: `Daily % increase (${factor} day average)`,
+            chartName: `Daily % increase (${options.smoothingFactor} day average)`,
 
-            xAxisLabels: this.dates.slice(factor),
+            xAxisLabels: this.dates.slice(options.smoothingFactor),
             yAxisData: ratios,
 
             name: this.name,
         };
     }
 
-    public getDaily(dataType: string): GraphingData {
+    public getDaily(dataType: string, options: Options): GraphingData {
         const workingData = this.data[dataType] || [];
+        let perCapitaFactor = options.perCapita ? 1000/this.population : 1;
         return {
             xAxisName: 'Date',
             yAxisName: `Daily ${dataType} cases`,
             chartName: `Total daily ${dataType} cases`,
 
             xAxisLabels: this.dates,
-            yAxisData: workingData,//.map(x => x /* * 1000/this.population */),
+            yAxisData: workingData.map(x => x * perCapitaFactor),
 
             name: this.name,
         };
     }
 
-    public getChange(dataType: string, days: number): GraphingData {
+    public getChange(dataType: string, options: Options): GraphingData {
         const workingData = this.data[dataType] || [];
         let differences = [];
-        for (let i = days; i < workingData.length; i++) {
-            differences.push((workingData[i] - workingData[i-days] ) / (days /* * this.population/1000*/));
+        let perCapitaFactor = options.perCapita ? 1000/this.population : 1;
+        for (let i = options.smoothingFactor; i < workingData.length; i++) {
+            differences.push(perCapitaFactor * (workingData[i] - workingData[i-options.smoothingFactor] ) / options.smoothingFactor);
         }
         return {
             xAxisName: 'Date',
             yAxisName: `Change in ${dataType} cases`,
-            chartName: `Change in daily ${dataType} cases (${days} day average)`,
+            chartName: `Change in daily ${dataType} cases (${options.smoothingFactor} day average)`,
 
-            xAxisLabels: this.dates.slice(days),
+            xAxisLabels: this.dates.slice(options.smoothingFactor),
             yAxisData: differences,
 
             name: this.name,
         };
     }
 
-    public getData(graphType: string, dataType: string, smoothingFactor: number): GraphingData {
+    public getData(graphType: string, dataType: string, options: Options): GraphingData {
+        let returnData: GraphingData;
         switch (graphType) {
             case 'ratio': 
-                return this.getRatiosSmooth(dataType, smoothingFactor);
+                returnData = this.getRatiosSmooth(dataType, options);
+                break;
             case 'daily': 
-                return this.getDaily(dataType);
+                returnData = this.getDaily(dataType, options);
+                break;
             case 'change': 
-                return this.getChange(dataType, smoothingFactor);
+                returnData = this.getChange(dataType, options);
+                break;
 
             default:
                 throw new Error(`Graph type '${graphType}' does not exist`);
         }
+
+        if (options.offset100) {
+            returnData.yAxisData = returnData.yAxisData.slice(this.daysTo100);
+            returnData.xAxisLabels = new Array(returnData.yAxisData.length);
+            for (let i = 0; i < returnData.xAxisLabels.length; i++) {
+                returnData.xAxisLabels[i] = String(i);
+            }
+
+            returnData.xAxisName = 'Days since 100 cases';
+        }
+
+        return returnData;
     }
 }

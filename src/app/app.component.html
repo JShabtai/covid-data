@@ -1,51 +1,59 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 
-<!-- Toolbar -->
-<div class="toolbar" role="banner">
-  <span>Covid data browser</span>
+<div class='testContainer'>
+    <!-- Toolbar -->
+    <mat-toolbar color='primary' class='toolbar'>
+        <button mat-icon-button (click)="snav.toggle()"><mat-icon>menu</mat-icon></button>
+        <h1>Covid data browser</h1>
+    </mat-toolbar>
+
+    <mat-sidenav-container class='sidenavContainer'>
+        <!-- Sidebar -->
+        <mat-sidenav class='testbar' mode='side' opened='true' #snav>
+            <div class='search'>
+                <mat-form-field>
+                    <input matInput #searchText placeholder='Search' type='search'>
+                </mat-form-field>
+                <!-- TODO Advanced filters (population, minimum cases, cases per capita and maybe sorting? -->
+            </div>
+            <div class='buttons'>
+                <button class='selectionButton' mat-raised-button color='accent' (click)='selectDefault()'>Select default</button>
+                <button class='selectionButton' mat-raised-button color='accent' (click)='deselectAll()'>Deselect all</button>
+            </div>
+            <mat-selection-list [(ngModel)]='selectedCountryList' (ngModelChange)='onNgModelChange($event)' (change)='onNgModelChange($event)'>
+                <mat-list-option *ngFor='let c of searchCountries(searchText.value)' [value]='c'>
+                    {{c}}
+                </mat-list-option>
+            </mat-selection-list>
+        </mat-sidenav>
+
+        <!-- Content -->
+        <mat-sidenav-content>
+            <div class="content" role="main">
+                <mat-form-field>
+                    <mat-label>Graph type</mat-label>
+                    <mat-select [(value)]='graphType' (selectionChange)='updateChart()'>
+                        <mat-option *ngFor="let g of graphTypes" value="{{g.toLowerCase()}}">{{g}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Data type</mat-label>
+                    <mat-select [(value)]='dataType' (selectionChange)='updateChart()'>
+                        <mat-option *ngFor="let d of dataTypes" value="{{d.toLowerCase()}}">{{d}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-checkbox checked='true' (change)="setPerCapita($event)">
+                    Per 1000 people
+                </mat-checkbox>
+
+                <mat-checkbox checked='true' (change)="setOffset100($event)">
+                    Align to 100 cases
+                </mat-checkbox>
+
+                <canvas id="myChart"></canvas>
+                <!-- TODO Table of summary data -->
+            </div>
+        </mat-sidenav-content>
+    </mat-sidenav-container>
 </div>
-
-<div class="sidebar" role="navigation">
-    <ul>
-        <li class='sidebarElement'>
-            <div class='sidebarElementName' (click)='onClick("country")'>Countries</div>
-            <ul>
-                <div class='countryList' *ngIf='menuSelection === "country"'>
-                    <button type='button' (click)='selectDefault()'>Select default</button>
-                    <button type='button' (click)='deselectAll()'>Deselect all</button>
-
-                    <li [class.selected]='selectedCountryList.has(countryName)' class='sidebarSubelement' (click) = 'setCountry(countryName)' *ngFor='let countryName of countryNames'>
-                        {{countryName}}
-                    </li>
-                </div>
-            </ul>
-        </li>
-        <li class='sidebarElement' (click)='onClick("options")'>
-            <div class='sidebarElementName'>Options</div>
-        </li>
-    </ul>
-</div>
-
-<div class="content" role="main">
-    <select>
-        <option *ngFor="let d of dataTypes" value="{{d}}" (click)='setDataType(d)'>{{d}}</option>
-    </select>
-    <select>
-        <option *ngFor="let g of graphTypes" value="{{g}}" (click)='setGraphType(g)'>{{g}}</option>
-    </select>
-    <!--
-    <mat-checkbox>
-        Per Capita
-    </mat-checkbox>
-    <mat-form-field>
-        <mat-label>Data type</mat-label>
-        <mat-select>
-            <mat-option *ngFor="let d of dataTypes" value="{{d}}">{{d}}</mat-option>
-        </mat-select>
-    </mat-form-field>
-    -->
-
-    <canvas id="myChart"></canvas>
-</div>
-
-<router-outlet></router-outlet>
