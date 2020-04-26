@@ -2,6 +2,19 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.0.7.
 
+## Requirements
+
+This project requires `npm` or similar (e.g. `yarn`) to run.
+
+## Initialization
+
+Before building/serving this project you will need to run the following commands:
+
+```bash
+npm install                     # Download project dependencies
+npm run-script updateData       # Dowload the COVID and population data. Re-run to update covid data.
+```
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
