@@ -1,29 +1,63 @@
 <mat-list class='helpDialog'>
-   <h3 matSubheader>About</h3>
-   <mat-list-item>
-      <p matLine>
-      I made this tool so that I could interactively explore COVID data. Some of the goals were:
-      </p>
-   </mat-list-item>
+    <h3 matSubheader>About</h3>
+    <mat-list-item class='largelistitem'>
+        <p matLine class='aboutNoTruncate'>
+        I made this tool so that I could interactively explore COVID data. Some of the goals were to identify milestones (such as peaks, decrease in case rates, etc...) and compare performance/progression in different countries.
+        </p>
+    </mat-list-item>
 
-   <mat-divider></mat-divider>
+    <mat-divider></mat-divider>
 
-   <h3 matSubheader>Sources</h3>
-   <mat-list-item>
-      <h4 matLine>Data</h4>
-      <p matLine> Data provided by <a href='https://github.com/CSSEGISandData/COVID-19'>Johns Hopkins</a></p>
-   </mat-list-item>
-   <mat-list-item>
-      <h4 matLine>Source code</h4>
-      <p matLine> <a href='https://github.com/JShabtai/covid-data'>View the source on GitHub </a></p>
-   </mat-list-item>
+    <h3 matSubheader>Other useful tools</h3>
+    <mat-list-item class='largelistitem'>
+        <h4 matLine><a href='https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6'>COVID-19 Dashboard by Johns Hopkins</a></h4>
+        <p matLine class='aboutNoTruncate'>
+            An interactive map of confirmed cases, plus more that seems to be getting added frequently.
+        </p>
+    </mat-list-item>
 
-   <mat-divider></mat-divider>
+    <mat-list-item class='largelistitem'>
+        <h4 matLine><a href='https://aatishb.com/covidtrends/'>Covid Trends</a></h4>
+        <p matLine class='aboutNoTruncate'>
+            A neat graph that plots number of daily cases against total cases, and uses animation to show time. Be sure to check out the video by Minute Physics linked at the top of the page.
+        </p>
+    </mat-list-item>
 
-   <h3 matSubheader>Other useful tools</h3>
-   <mat-list-item>
-       <h4 matLine><a href='https://aatishb.com/covidtrends/'>Covid Trends</a></h4>
-      <p matLine>A neat graph that plots number of daily cases against total cases, and uses animation to show time.</p>
-   </mat-list-item>
+    <mat-list-item class='largelistitem'>
+        <h4 matLine><a href='https://covid19.healthdata.org/'>COVID-19 Health Data</a></h4>
+        <p matLine class='aboutNoTruncate'>
+            Compiles and displays lots of data including number of cases and healthcare resources and political orders (stay at home, school/business closures etc)... Also calculates projections which may be of interest.
+        </p>
+    </mat-list-item>
+
+    <mat-list-item class='largelistitem'>
+        <h4 matLine><a href='https://covid19dashboards.com/'>COVID-19 Dashboards</a></h4>
+        <p matLine class='aboutNoTruncate'>
+            A compilation of many different dashboards for COVID-19.
+        </p>
+    </mat-list-item>
+
+    <mat-list-item class='largelistitem'>
+        <h4 matLine><a href='https://covid-19incanada.com/index.html'>COVID-19 in Canada</a></h4>
+        <p matLine class='aboutNoTruncate'>
+            A set of graphs, maps, and other visualizations specifically related to Canada.
+        </p>
+    </mat-list-item>
+
+    <mat-divider></mat-divider>
+
+    <h3 matSubheader>Sources</h3>
+    <mat-list-item class='largelistitem'>
+        <h4 matLine>COVID Data</h4>
+        <p matLine class='aboutNoTruncate'> Data provided by <a href='https://github.com/CSSEGISandData/COVID-19'>Johns Hopkins</a></p>
+    </mat-list-item>
+    <mat-list-item class='largelistitem'>
+        <h4 matLine>Population Data</h4>
+        <p matLine class='aboutNoTruncate'>Most data is from <a href='https://github.com/samayo/country-json'>Samayo on GitHub</a>. Some countries manually filled in from Wikipedia.</p>
+    </mat-list-item>
+    <mat-list-item class='largelistitem'>
+        <h4 matLine>Source code</h4>
+        <p matLine class='aboutNoTruncate'> <a href='https://github.com/JShabtai/covid-data'>View the source on GitHub </a></p>
+    </mat-list-item>
 
 </mat-list>

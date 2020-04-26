@@ -1,0 +1,8 @@
+/* Without these settings the list items will be truncated */
+mat-list-item.largelistitem {
+    height: auto;
+}
+
+.mat-line.aboutNoTruncate {
+    white-space: normal;
+}
