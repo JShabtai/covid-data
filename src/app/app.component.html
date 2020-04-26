@@ -1,9 +1,7 @@
-<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
-
 <div class='testContainer'>
     <!-- Toolbar -->
     <mat-toolbar color='primary' class='toolbar'>
-        <button mat-icon-button (click)="snav.toggle()"><mat-icon>menu</mat-icon></button>
+        <button mat-icon-button (click)="sideNav.toggle()"><mat-icon>menu</mat-icon></button>
         <h1>Covid data browser</h1>
 
         <span class="spacer"></span>
@@ -18,7 +16,7 @@
 
     <mat-sidenav-container class='sidenavContainer'>
         <!-- Sidebar -->
-        <mat-sidenav class='testbar' mode='side' opened='true' #snav>
+        <mat-sidenav class='testbar' mode='side' opened='true' #sideNav>
             <div class='search'>
                 <mat-form-field>
                     <input matInput #searchText placeholder='Search' type='search'>

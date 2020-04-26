@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { Component, ViewChild } from '@angular/core';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatSidenav } from '@angular/material/sidenav';
 
 import { Observable } from 'rxjs';
 
@@ -65,6 +66,8 @@ export class AppComponent {
       [country: string]: number;
   } = {};
 
+  @ViewChild('sideNav') sideNav: MatSidenav;
+
   constructor(
       private dataFetcher: DataFetcherService,
       private dialog: MatDialog,
@@ -97,6 +100,12 @@ export class AppComponent {
               }
           });
       }).subscribe(() => {
+          // Toggle because the layout gets screwed up and I'm not sure why but closing
+          // and opening fixes it. TODO look into this...
+          // I think it has something to do with the width changing as countries are added.
+          this.sideNav.toggle();
+          this.sideNav.toggle();
+
           // Generate country data
           for (let region of this.regionNames) {
               this.addCountryData(this.regions[region]);
@@ -188,22 +197,6 @@ export class AppComponent {
 
       this.countries[dataset.country].addDataset(dataset);
   }
-
-  // public setCountry(x, updateChart: boolean = true) {
-  //     console.log(this.selectedOptions);
-  //     if (this.selectedCountries.some(country => country.name === x)) {
-  //         this.selectedCountries = this.selectedCountries.filter(country => country.name !== x);
-  //         this.selectedCountryList.delete(x);
-  //     }
-  //     else {
-  //         this.selectedCountries.push(this.countries[x]);
-  //         this.selectedCountryList.add(x);
-  //     }
-
-  //     if (updateChart) {
-  //         this.updateChart();
-  //     }
-  // }
 
   public updateChart() {
       const plots = this.selectedCountryList.map(c => this.countries[c].getData(this.graphType, this.dataType, {
