@@ -71,17 +71,10 @@ p {
     flex: 1;
 }
 
-.toolbar {
-}
-
 .content {
-    position: relative;
-    top: 0;
-    margin: 50px 20px 32px 50px;
-    padding: 25px;
-    max-width: calc(100% - 320px);
-    max-height: 100%;
-    align-items: center;
-    background: #eee;
+    padding: 15px;
 }
 
+.spacer {
+    flex: 1 1 auto;
+}

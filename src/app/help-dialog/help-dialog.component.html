@@ -1,0 +1,50 @@
+<mat-list class='helpDialog'>
+   <h3 matSubheader>Data Types</h3>
+   <mat-list-item>
+      <h4 matLine>Confirmed</h4>
+      <p matLine> The total number of confirmed cases of COVID-19 </p>
+   </mat-list-item>
+   <mat-list-item>
+      <h4 matLine>Active</h4>
+      <p matLine> The number of active cases of COVID-19 each day (this is equal to confirmed - (recovered + deaths) </p>
+   </mat-list-item>
+   <mat-list-item>
+      <h4 matLine>Recovered</h4>
+      <p matLine> The total number of recovered cases as of each day </p>
+   </mat-list-item>
+   <mat-list-item>
+      <h4 matLine>Deaths</h4>
+      <p matLine> The total number of deaths as of each day </p>
+   </mat-list-item>
+
+   <mat-divider></mat-divider>
+
+   <h3 matSubheader>Graph Types</h3>
+   <mat-list-item>
+      <h4 matLine>Daily</h4>
+      <p matLine> The number of cases of the selected type each day </p>
+   </mat-list-item>
+   <mat-list-item>
+      <h4 matLine>Change</h4>
+      <p matLine> The daily change in the number of cases of the selected type, as a 7 day average</p>
+      <p matLine>
+          Example: Today there are 170 cases and 7 days ago there were 100. The change for today is (170 - 100) / 7 = 10.
+      </p>
+   </mat-list-item>
+   <mat-list-item>
+      <h4 matLine>Ratio</h4>
+      <p matLine> The percentage change as a 7 day average. </p>
+   </mat-list-item>
+
+   <mat-divider></mat-divider>
+
+   <h3 matSubheader>Other Options</h3>
+   <mat-list-item>
+      <h4 matLine>Per 1000 people</h4>
+      <p matLine> The 'daily' and 'change' graphs will show the values per 1000 people in the country/region </p>
+   </mat-list-item>
+   <mat-list-item>
+      <h4 matLine>Align to 100 cases</h4>
+      <p matLine> Start the graph for each region at the first day they had 100 cases </p>
+   </mat-list-item>
+</mat-list>

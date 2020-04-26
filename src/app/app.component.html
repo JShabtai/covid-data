@@ -5,6 +5,15 @@
     <mat-toolbar color='primary' class='toolbar'>
         <button mat-icon-button (click)="snav.toggle()"><mat-icon>menu</mat-icon></button>
         <h1>Covid data browser</h1>
+
+        <span class="spacer"></span>
+
+        <button mat-button (click)='openAbout()'>
+            <mat-icon class='toolbarButton'>info</mat-icon> About
+        </button>
+        <button mat-button (click)='openHelp()'>
+            <mat-icon class='toolbarButton'>help</mat-icon> Help
+        </button>
     </mat-toolbar>
 
     <mat-sidenav-container class='sidenavContainer'>
@@ -21,9 +30,13 @@
                 <button class='selectionButton' mat-raised-button color='accent' (click)='deselectAll()'>Deselect all</button>
             </div>
             <mat-selection-list [(ngModel)]='selectedCountryList' (ngModelChange)='onNgModelChange($event)' (change)='onNgModelChange($event)'>
-                <mat-list-option *ngFor='let c of searchCountries(searchText.value)' [value]='c'>
-                    {{c}}
-                </mat-list-option>
+                <ng-container *ngFor='let c of countryNames'>
+                    <div [hidden]='hideCountry(searchText.value, c)'>
+                        <mat-list-option [value]='c'>
+                            {{c}}
+                        </mat-list-option>
+                    </div>
+                </ng-container>
             </mat-selection-list>
         </mat-sidenav>
 

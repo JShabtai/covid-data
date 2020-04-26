@@ -9,14 +9,16 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MaterialModule } from './material-module';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { CovidgraphComponent } from './covidgraph/covidgraph.component';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HelpDialogComponent } from './help-dialog/help-dialog.component';
+import { AboutDialogComponent } from './about-dialog/about-dialog.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    CovidgraphComponent
+    HelpDialogComponent,
+    AboutDialogComponent,
   ],
   imports: [
     BrowserModule,

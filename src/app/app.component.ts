@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 
 import { Observable } from 'rxjs';
 
+import { AboutDialogComponent } from './about-dialog/about-dialog.component';
+import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 import { DataFetcherService } from './data-fetcher.service';
 import { Dataset } from './dataset';
 import { parse } from 'csv-es';
@@ -64,6 +67,7 @@ export class AppComponent {
 
   constructor(
       private dataFetcher: DataFetcherService,
+      private dialog: MatDialog,
   ) {
       const observable = new Observable(subscriber => {
           let count = 0;
@@ -321,5 +325,25 @@ export class AppComponent {
       return this.countryNames.filter((country) => {
           return (country.toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) >= 0);
       });
+  }
+
+  public hideCountry(search: string, country: string): boolean {
+      return country.toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) < 0;
+  }
+
+  public openHelp() {
+    const dialogRef = this.dialog.open(HelpDialogComponent, {
+      height: '450px',
+      width: '850px',
+      data: {}
+    });
+  }
+
+  public openAbout() {
+    const dialogRef = this.dialog.open(AboutDialogComponent, {
+      height: '450px',
+      width: '850px',
+      data: {}
+    });
   }
 }
