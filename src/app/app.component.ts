@@ -46,8 +46,7 @@ export class AppComponent {
 
   public menuSelection = MenuSelection.Country ;
   public menuOpen = true;
-  public selectedCountryList: string[] = [];
-  public selectedCountries: Dataset[] = [];
+  public selectedCountryList: Dataset[] = [];
 
   public headers: string[];
   public chart: Chart;
@@ -163,6 +162,12 @@ export class AppComponent {
       });
   }
 
+  public getCountries(): Dataset[] {
+      return Object.keys(this.countries).sort().map((country) => {
+          return this.countries[country];
+      });
+  }
+
   private addDataToDataset(dataType: string, data: string) {
       const records = parse(data);
       const headers = records[0];
@@ -199,7 +204,7 @@ export class AppComponent {
   }
 
   public updateChart() {
-      const plots = this.selectedCountryList.map(c => this.countries[c].getData(this.graphType, this.dataType, {
+      const plots = this.selectedCountryList.map(c => c.getData(this.graphType, this.dataType, {
           smoothingFactor: 7,
           perCapita: this.perCapita,
           offset100: this.offset100,
@@ -287,7 +292,7 @@ export class AppComponent {
           'Spain',
           'US',
           'United Kingdom',
-      ].sort();
+      ].sort().map(name => this.countries[name]);
 
       this.updateChart();
   }
@@ -311,7 +316,6 @@ export class AppComponent {
 
   // TODO Preserve order of array. Maybe one way binding and update with this event?
   public onNgModelChange(event) {
-      console.log(event);
       this.updateChart()
   }
   public searchCountries(search: string): string[] {

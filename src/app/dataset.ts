@@ -26,7 +26,10 @@ export class Dataset {
     private static readonly longitudeColumn = 3;
     private static readonly dataStartColumn = 4;
 
-    public subregions: Dataset[] = [];
+    /**
+     * Smaller regions which this one is made up of (e.g. provinces in a country)
+     */
+    public subsets: Dataset[] = [];
 
     public country: string;
     public province: string;
@@ -36,6 +39,8 @@ export class Dataset {
 
     public totalConfirmed = 0;
     public daysTo100 = 0;
+
+    public expand: boolean = false;
 
     /**
      * TODOs
@@ -48,7 +53,8 @@ export class Dataset {
     } = {};
 
     // This is not a great default, but it makes the graph usable for countries with no population data
-    public population = 1;
+    // The per-capita view will be the same as the normal view
+    public population = 1000;
 
     constructor();
     constructor(header: string[], record: string[]);
@@ -62,7 +68,7 @@ export class Dataset {
 
 
             if (this.province.length > 0) {
-                this.name = `${this.country}/${this.province}`;
+                this.name = `${this.province}`;
             }
             else {
                 this.name = this.country;
@@ -82,13 +88,7 @@ export class Dataset {
      * - Number of days to 100 cases
      */
     public analyze() {
-        if (this.data['confirmed'] && this.data['recovered'] && this.data['deaths']) {
-            this.data['active'] = [...this.data['confirmed']];
-            for (let i = 0; i < this.data['active'].length; i++) {
-                this.data['active'][i] -= this.data['recovered'][i];
-                this.data['active'][i] -= this.data['deaths'][i];
-            }
-
+        if (this.data['confirmed']) {
             this.totalConfirmed = this.data['confirmed'][this.data['confirmed'].length - 1]
 
             this.daysTo100 = this.data['confirmed'].length;
@@ -98,10 +98,23 @@ export class Dataset {
                     break;
                 }
             }
+
+            if (this.data['recovered'] && this.data['deaths']) {
+                this.data['active'] = [...this.data['confirmed']];
+                for (let i = 0; i < this.data['active'].length; i++) {
+                    this.data['active'][i] -= this.data['recovered'][i];
+                    this.data['active'][i] -= this.data['deaths'][i];
+                }
+            }
         }
     }
 
     public addDataset(dataset: Dataset): void {
+        // For some reason there are rows for the province of 'Recovered' in Canada with no data. Ignore them.
+        if (dataset.name === 'Recovered') {
+            return;
+        }
+
         if (this.country == null) {
             this.dates = [...dataset.dates];
             this.country = dataset.country;
@@ -129,7 +142,13 @@ export class Dataset {
         this.analyze();
 
         this.province = '';
-        this.subregions.push(dataset);
+
+        // Canada only has a row for number of recoveries at the national level. We want to include this
+        // data, but don't want to have 'Canada' as a subset of itself.
+        if (dataset.name !== 'Canada') {
+            this.subsets.push(dataset);
+        }
+
     }
     public getRatiosSmooth(dataType: string, options: Options): GraphingData {
         const workingData = this.data[dataType] || [];
@@ -215,5 +234,10 @@ export class Dataset {
         }
 
         return returnData;
+    }
+
+    public toggleExpand() {
+        console.log('toggling ' + this.name);
+        this.expand = !this.expand;
     }
 }

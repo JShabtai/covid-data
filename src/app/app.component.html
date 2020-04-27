@@ -16,23 +16,38 @@
 
     <mat-sidenav-container class='sidenavContainer'>
         <!-- Sidebar -->
-        <mat-sidenav class='testbar' mode='side' opened='true' #sideNav>
+        <mat-sidenav class='countryList' mode='side' opened='true' #sideNav>
             <div class='search'>
                 <mat-form-field>
                     <input matInput #searchText placeholder='Search' type='search'>
                 </mat-form-field>
+                <div class='buttons'>
+                    <button class='selectionButton' mat-raised-button color='accent' (click)='selectDefault()'>Select default</button>
+                    <button class='selectionButton' mat-raised-button color='accent' (click)='deselectAll()'>Deselect all</button>
+                </div>
                 <!-- TODO Advanced filters (population, minimum cases, cases per capita and maybe sorting? -->
             </div>
-            <div class='buttons'>
-                <button class='selectionButton' mat-raised-button color='accent' (click)='selectDefault()'>Select default</button>
-                <button class='selectionButton' mat-raised-button color='accent' (click)='deselectAll()'>Deselect all</button>
-            </div>
             <mat-selection-list [(ngModel)]='selectedCountryList' (ngModelChange)='onNgModelChange($event)' (change)='onNgModelChange($event)'>
-                <ng-container *ngFor='let c of countryNames'>
-                    <div [hidden]='hideCountry(searchText.value, c)'>
-                        <mat-list-option [value]='c'>
-                            {{c}}
-                        </mat-list-option>
+                <ng-container *ngFor='let c of getCountries()'>
+                    <div [hidden]='hideCountry(searchText.value, c.name)'>
+                        <div style='display: flex'>
+                            <button mat-button *ngIf='c.subsets.length >= 2 && c.name !== " Global"; else no_expand' (click)='c.toggleExpand()' class='expandListButton'>
+                                <mat-icon>
+                                    {{c.expand ? 'expand_less' : 'expand_more'}}
+                                </mat-icon>
+                            </button>
+                            <ng-template #no_expand>
+                                <div class='expandListButton'></div>
+                            </ng-template>
+                            <mat-list-option [value]='c'>
+                                {{c.name}}
+                            </mat-list-option>
+                        </div>
+                            <div *ngIf='c.expand' class='subregion'>
+                                <mat-list-option *ngFor='let r of c.subsets' [value]='r'>
+                                        {{r.name}}
+                                </mat-list-option>
+                            </div>
                     </div>
                 </ng-container>
             </mat-selection-list>
