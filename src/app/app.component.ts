@@ -7,7 +7,8 @@ import { Observable } from 'rxjs';
 import { AboutDialogComponent } from './about-dialog/about-dialog.component';
 import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 import { DataFetcherService } from './data-fetcher.service';
-import { Dataset } from './dataset';
+import { PopulationService } from './population/population.service';
+import { Dataset, GLOBAL_NAME } from './dataset';
 import { parse } from 'csv-es';
 
 import * as Chart from 'chart.js';
@@ -41,9 +42,6 @@ export class AppComponent {
   public countries: {[country: string]: Dataset} = {};
   public regions: {[region: string]: Dataset} = {};
 
-  public regionNames: string[] = [];
-  public countryNames: string[] = [];
-
   public menuSelection = MenuSelection.Country ;
   public menuOpen = true;
   public selectedCountryList: Dataset[] = [];
@@ -61,14 +59,11 @@ export class AppComponent {
   public perCapita: boolean = true;
   public selectedOptions;
 
-  public populationData: {
-      [country: string]: number;
-  } = {};
-
   @ViewChild('sideNav') sideNav: MatSidenav;
 
   constructor(
       private dataFetcher: DataFetcherService,
+      private populationService: PopulationService,
       private dialog: MatDialog,
   ) {
       const observable = new Observable(subscriber => {
@@ -78,26 +73,11 @@ export class AppComponent {
               .subscribe((data: string) => {
                   this.addDataToDataset(dataType, data);
 
-                  if (++count >= 4) {
+                  if (++count >= 3) {
                       subscriber.next();
                   }
               });
           }
-
-          this.dataFetcher.fetchPopulation()
-          .subscribe((data: string) => {
-              const populations: {
-                  country: string;
-                  population: string;
-              }[] = JSON.parse(data);
-              for (let population of populations) {
-                  this.populationData[population.country] = Number(population.population);
-              }
-
-              if (++count >= 4) {
-                  subscriber.next();
-              }
-          });
       }).subscribe(() => {
           // Toggle because the layout gets screwed up and I'm not sure why but closing
           // and opening fixes it. TODO look into this...
@@ -106,64 +86,47 @@ export class AppComponent {
           this.sideNav.toggle();
 
           // Generate country data
-          for (let region of this.regionNames) {
+          for (let region of Object.keys(this.regions)) {
               this.addCountryData(this.regions[region]);
-          }
-          // this.countries[' Ontario'].population = 13448494;
-
-          // These names don't line up nicely between the two sources, manually map them
-          this.countries["US"].population = this.populationData['United States'];
-          this.countries["Holy See"].population = this.populationData['Holy See (Vatican City State)'];
-          this.countries["Timor-Leste"].population = this.populationData['East Timor'];
-          this.countries["Sri Lanka"].population = this.populationData['SriLanka'];
-          this.countries["Libya"].population = this.populationData['Libyan Arab Jamahiriya'];
-          this.countries["Korea, South"].population = this.populationData['South Korea'];
-          this.countries["Fiji"].population = this.populationData['Fiji Islands'];
-          this.countries["Eswatini"].population = this.populationData['Swaziland'];
-          this.countries["Czechia"].population = this.populationData['Czech Republic'];
-          this.countries["Cote d'Ivoire"].population = this.populationData['Ivory Coast'];
-          this.countries["Cabo Verde"].population = this.populationData['Cape Verde'];
-          this.countries["Burma"].population = this.populationData['Myanmar'];
-
-          // The John Hopkins data doesn't line up well with the population data, so
-          // manually set these
-          this.countries["Serbia"].population = 6963764;
-          this.countries["Russia"].population = 146745098;
-          this.countries["Montenegro"].population = 631219;
-          this.countries["Kosovo"].population = 1810463;
-          this.countries["Congo (Kinshasa)"].population = 11855000;
-          this.countries["Congo (Brazzaville)"].population = 5244369;
-          this.countries["Taiwan*"].population = 23780542;
-          this.countries["Diamond Princess"].population = 3711;
-          this.countries["MS Zaandam"].population = 1829;
-
-          for (let country of this.countryNames) {
-              if (typeof(this.populationData[country]) === 'number') {
-                  this.countries[country].population = this.populationData[country];
-              }
           }
 
           this.selectDefault();
 
-          let global = new Dataset();
-          global.population = 0;
-          global.name = ' Global';
-          global.country = ' Global';
-          global.province = ' Global';
-          global.dates = this.countries[this.countryNames[0]].dates;
-          for (let country of this.countryNames) {
+          let global = new Dataset(this.populationService);
+          global.name = GLOBAL_NAME;
+          global.country = GLOBAL_NAME;
+          global.province = GLOBAL_NAME;
+          global.dates = this.countries[Object.keys(this.countries)[0]].dates;
+
+          for (let country of Object.keys(this.countries)) {
+              this.populationService.addCountryToGlobe(country);
               global.addDataset(this.countries[country]);
-              global.population += this.countries[country].population;
           }
 
           this.countries[global.name] = global;
-          this.countryNames.push(global.name);
-          this.countryNames.sort();
       });
   }
 
   public getCountries(): Dataset[] {
-      return Object.keys(this.countries).sort().map((country) => {
+      return Object.keys(this.countries).sort((first, second) => {
+              if (first === GLOBAL_NAME) {
+                  return -1;
+              }
+              else if (second === GLOBAL_NAME) {
+                  return 1;
+              }
+              else {
+                  if (first < second) {
+                      return -1;
+                  }
+                  else if (second < first) {
+                      return 1;
+                  }
+                  else {
+                      return 0;
+                  }
+              }
+          }).map((country) => {
           return this.countries[country];
       });
   }
@@ -175,29 +138,24 @@ export class AppComponent {
       this.headers = headers.slice(4);
 
       for (let record of records.slice(1)) {
-          let dataset = new Dataset(headers, record);
+          let dataset = Dataset.CreateFromHeader(this.populationService, headers, record);
           if (this.regions[dataset.name] instanceof Dataset) {
               dataset = this.regions[dataset.name];
           }
           else {
-              this.regionNames.push(dataset.name);
               this.regions[dataset.name] = dataset;
           }
           dataset.addData(dataType, headers, record);
       }
-
-      this.countryNames.sort();
-      this.regionNames.sort();
   }
 
   private addCountryData(dataset: Dataset): void {
       if (!(this.countries[dataset.country] instanceof Dataset)) {
-          const country = new Dataset();
+          const country = new Dataset(this.populationService, );
           country.dates = dataset.dates;
           country.name = dataset.country;
           country.country = dataset.country;
           this.countries[dataset.country] = country;
-          this.countryNames.push(dataset.country);
       }
 
       this.countries[dataset.country].addDataset(dataset);
@@ -317,11 +275,6 @@ export class AppComponent {
   // TODO Preserve order of array. Maybe one way binding and update with this event?
   public onNgModelChange(event) {
       this.updateChart()
-  }
-  public searchCountries(search: string): string[] {
-      return this.countryNames.filter((country) => {
-          return (country.toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) >= 0);
-      });
   }
 
   public hideCountry(search: string, country: string): boolean {
