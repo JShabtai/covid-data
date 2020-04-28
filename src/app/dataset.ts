@@ -1,3 +1,7 @@
+import { PopulationService } from './population/population.service';
+
+export const GLOBAL_NAME = 'Global';
+
 export interface Options {
     perCapita: boolean;
     smoothingFactor: number;
@@ -52,28 +56,29 @@ export class Dataset {
         [dataType: string]: number[];
     } = {};
 
-    // This is not a great default, but it makes the graph usable for countries with no population data
-    // The per-capita view will be the same as the normal view
-    public population = 1000;
+    constructor(
+        private populationService: PopulationService,
+    ) {
+    }
 
-    constructor();
-    constructor(header: string[], record: string[]);
-    constructor(header?: string[], record?: string[]) {
-        if (header instanceof Array && record instanceof Array) {
-            this.dates = header.slice(Dataset.dataStartColumn);
-            this.country = record[Dataset.countryColumn];
-            this.province = record[Dataset.provinceColumn] ||"";
-            this.latitude = Number(record[Dataset.latitudeColumn]);
-            this.longitude = Number(record[Dataset.longitudeColumn]);
+    public static CreateFromHeader(populationService: PopulationService, header: string[], record: string[]): Dataset {
+        const dataset = new Dataset(populationService);
+
+        dataset.dates = header.slice(Dataset.dataStartColumn);
+        dataset.country = record[Dataset.countryColumn];
+        dataset.province = record[Dataset.provinceColumn] ||"";
+        dataset.latitude = Number(record[Dataset.latitudeColumn]);
+        dataset.longitude = Number(record[Dataset.longitudeColumn]);
 
 
-            if (this.province.length > 0) {
-                this.name = `${this.province}`;
-            }
-            else {
-                this.name = this.country;
-            }
+        if (dataset.province.length > 0) {
+            dataset.name = `${dataset.province}`;
         }
+        else {
+            dataset.name = dataset.country;
+        }
+
+        return dataset;
     }
 
     public addData(dataType: string, header: string[], record: string[]) {
@@ -145,9 +150,10 @@ export class Dataset {
 
         // Canada only has a row for number of recoveries at the national level. We want to include this
         // data, but don't want to have 'Canada' as a subset of itself.
-        if (dataset.name !== 'Canada') {
-            this.subsets.push(dataset);
+        if (dataset.name === 'Canada' || this.name === GLOBAL_NAME) {
+            return;
         }
+        this.subsets.push(dataset);
 
     }
     public getRatiosSmooth(dataType: string, options: Options): GraphingData {
@@ -174,7 +180,7 @@ export class Dataset {
 
     public getDaily(dataType: string, options: Options): GraphingData {
         const workingData = this.data[dataType] || [];
-        let perCapitaFactor = options.perCapita ? 1000/this.population : 1;
+        let perCapitaFactor = options.perCapita ? 1000/this.population() : 1;
         return {
             xAxisName: 'Date',
             yAxisName: `Daily ${dataType} cases`,
@@ -190,7 +196,7 @@ export class Dataset {
     public getChange(dataType: string, options: Options): GraphingData {
         const workingData = this.data[dataType] || [];
         let differences = [];
-        let perCapitaFactor = options.perCapita ? 1000/this.population : 1;
+        let perCapitaFactor = options.perCapita ? 1000/this.population() : 1;
         for (let i = options.smoothingFactor; i < workingData.length; i++) {
             differences.push(perCapitaFactor * (workingData[i] - workingData[i-options.smoothingFactor] ) / options.smoothingFactor);
         }
@@ -237,7 +243,18 @@ export class Dataset {
     }
 
     public toggleExpand() {
-        console.log('toggling ' + this.name);
         this.expand = !this.expand;
+    }
+
+    public population(): number {
+        if (this.name === GLOBAL_NAME) {
+            return this.populationService.getGlobalPopulation();
+        }
+        else if (this.province != '') {
+            return this.populationService.getRegionPopulation(this.country, this.province);
+        }
+        else {
+            return this.populationService.getCountryPopulation(this.country);
+        }
     }
 }
