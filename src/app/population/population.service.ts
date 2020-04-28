@@ -55,6 +55,10 @@ export class PopulationService {
         if (RegionPopulations[country] && RegionPopulations[country][region]) {
             return RegionPopulations[country][region];
         }
+        else {
+            console.warn(`Missing population for region '${region}' in country '${country}'`);
+            return DEFAULT_POPULATION;
+        }
     }
 
     public getCountryPopulation(country: string): number {

@@ -26,8 +26,6 @@ export interface GraphingData {
 export class Dataset {
     private static readonly countryColumn = 1;
     private static readonly provinceColumn = 0;
-    private static readonly latitudeColumn = 2;
-    private static readonly longitudeColumn = 3;
     private static readonly dataStartColumn = 4;
 
     /**
@@ -38,8 +36,6 @@ export class Dataset {
     public country: string;
     public province: string;
     public name: string;
-    public latitude: number;
-    public longitude: number;
 
     public totalConfirmed = 0;
     public daysTo100 = 0;
@@ -67,8 +63,6 @@ export class Dataset {
         dataset.dates = header.slice(Dataset.dataStartColumn);
         dataset.country = record[Dataset.countryColumn];
         dataset.province = record[Dataset.provinceColumn] ||"";
-        dataset.latitude = Number(record[Dataset.latitudeColumn]);
-        dataset.longitude = Number(record[Dataset.longitudeColumn]);
 
 
         if (dataset.province.length > 0) {
@@ -114,7 +108,7 @@ export class Dataset {
         }
     }
 
-    public addDataset(dataset: Dataset): void {
+    public addDataset(dataset: Dataset, trackSubset: boolean = true): void {
         // For some reason there are rows for the province of 'Recovered' in Canada with no data. Ignore them.
         if (dataset.name === 'Recovered') {
             return;
@@ -124,8 +118,6 @@ export class Dataset {
             this.dates = [...dataset.dates];
             this.country = dataset.country;
             this.name = dataset.country;
-            this.latitude = dataset.latitude;
-            this.longitude = dataset.longitude;
 
             for (let dataType of Object.keys(dataset.data)) {
                 this.data[dataType] = [...dataset.data[dataType]];
@@ -150,7 +142,7 @@ export class Dataset {
 
         // Canada only has a row for number of recoveries at the national level. We want to include this
         // data, but don't want to have 'Canada' as a subset of itself.
-        if (dataset.name === 'Canada' || this.name === GLOBAL_NAME) {
+        if (dataset.name === 'Canada' || !trackSubset) {
             return;
         }
         this.subsets.push(dataset);
@@ -250,7 +242,7 @@ export class Dataset {
         if (this.name === GLOBAL_NAME) {
             return this.populationService.getGlobalPopulation();
         }
-        else if (this.province != '') {
+        else if (this.province != '' || this.name==='California') {
             return this.populationService.getRegionPopulation(this.country, this.province);
         }
         else {

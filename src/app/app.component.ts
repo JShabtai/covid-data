@@ -40,13 +40,13 @@ export class AppComponent {
   ];
 
   public countries: {[country: string]: Dataset} = {};
+  public states: {[state: string]: Dataset} = {};
   public regions: {[region: string]: Dataset} = {};
 
   public menuSelection = MenuSelection.Country ;
   public menuOpen = true;
   public selectedCountryList: Dataset[] = [];
 
-  public headers: string[];
   public chart: Chart;
 
   public dataTypes: string[] = ['Confirmed', 'Active', 'Recovered', 'Deaths'];
@@ -69,11 +69,23 @@ export class AppComponent {
       const observable = new Observable(subscriber => {
           let count = 0;
           for (let dataType of ['confirmed', 'deaths', 'recovered']) {
-              this.dataFetcher.fetchData(dataType)
+              this.dataFetcher.fetchGlobalData(dataType)
               .subscribe((data: string) => {
                   this.addDataToDataset(dataType, data);
 
-                  if (++count >= 3) {
+                  if (++count >= 5) {
+                      subscriber.next();
+                  }
+              });
+          }
+
+          // Currently there is no recovered data for individual states
+          for (let dataType of ['confirmed', 'deaths']) {
+              this.dataFetcher.fetchUsData(dataType)
+              .subscribe((data: string) => {
+                  this.addUsData(dataType, data);
+
+                  if (++count >= 5) {
                       subscriber.next();
                   }
               });
@@ -90,6 +102,8 @@ export class AppComponent {
               this.addCountryData(this.regions[region]);
           }
 
+          this.countries['US'].subsets = Object.values(this.states);
+
           this.selectDefault();
 
           let global = new Dataset(this.populationService);
@@ -100,7 +114,7 @@ export class AppComponent {
 
           for (let country of Object.keys(this.countries)) {
               this.populationService.addCountryToGlobe(country);
-              global.addDataset(this.countries[country]);
+              global.addDataset(this.countries[country], false);
           }
 
           this.countries[global.name] = global;
@@ -131,11 +145,9 @@ export class AppComponent {
       });
   }
 
-  private addDataToDataset(dataType: string, data: string) {
+  private addDataToDataset(dataType: string, data: string): void {
       const records = parse(data);
       const headers = records[0];
-
-      this.headers = headers.slice(4);
 
       for (let record of records.slice(1)) {
           let dataset = Dataset.CreateFromHeader(this.populationService, headers, record);
@@ -149,9 +161,41 @@ export class AppComponent {
       }
   }
 
+  private addUsData(dataType: string, data: string): void {
+      // TODO This is messy and needs to be tidied up...
+      const records = parse(data);
+      const headers = records[0];
+
+      for (let record of records.slice(1)) {
+          const dataset = new Dataset(this.populationService);
+
+          dataset.dates = headers.slice(11)
+          dataset.country = 'US'
+          dataset.province = record[6];
+          dataset.name = record[6];
+
+          dataset.data[dataType] = record.slice(11).map(Number);
+
+          if (dataset.province === '') {
+              continue;
+          }
+
+          if (this.states[dataset.name] instanceof Dataset) {
+              const state = this.states[dataset.name];
+              state.addDataset(dataset, false);
+              // Need to set the province (state) again because addDataset clears it. Yeah, this
+              // logic needs reworking. Should probably pre-process this server-side, TBH.
+              state.province = record[6];
+          }
+          else {
+              this.states[dataset.name] = dataset;
+          }
+      }
+  }
+
   private addCountryData(dataset: Dataset): void {
       if (!(this.countries[dataset.country] instanceof Dataset)) {
-          const country = new Dataset(this.populationService, );
+          const country = new Dataset(this.populationService);
           country.dates = dataset.dates;
           country.name = dataset.country;
           country.country = dataset.country;

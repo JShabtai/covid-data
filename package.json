@@ -11,9 +11,10 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "updateCovidData": "cd src/assets; for f in confirmed deaths recovered; do wget -N 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_'\"$f\"'_global.csv'; done",
+    "updateUsCovidData": "cd src/assets; for f in confirmed deaths; do wget -N 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_'\"$f\"'_US.csv'; done",
+    "updateGlobalCovidData": "cd src/assets; for f in confirmed deaths recovered; do wget -N 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_'\"$f\"'_global.csv'; done",
     "updatePopData": "wget -N https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-population.json -O src/app/population/data/countries.json",
-    "updateData": "npm run-script updateCovidData; npm run-script updatePopData"
+    "updateData": "npm run updateUsCovidData; npm run updateGlobalCovidData; npm run updatePopData"
   },
   "private": true,
   "dependencies": {

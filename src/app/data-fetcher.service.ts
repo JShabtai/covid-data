@@ -12,11 +12,11 @@ export class DataFetcherService {
       private http: HttpClient,
   ) { }
 
-  fetchPopulation() {
-      return this.http.get(`/assets/population.json`, { responseType: "text" });
+  fetchGlobalData(dataType: string) {
+      return this.http.get(`/assets/time_series_covid19_${dataType}_global.csv`, { responseType: "text" });
   }
 
-  fetchData(dataType: string) {
-      return this.http.get(`/assets/time_series_covid19_${dataType}_global.csv`, { responseType: "text" });
+  fetchUsData(dataType: string) {
+      return this.http.get(`/assets/time_series_covid19_${dataType}_US.csv`, { responseType: "text" });
   }
 }
