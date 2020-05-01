@@ -69,6 +69,7 @@ p {
 
 .content {
     padding: 15px;
+    max-height: calc(100% - 64px - 10px);
 }
 
 .spacer {
@@ -86,4 +87,8 @@ p {
     margin: 0;
     padding: 0;
     display: block;
+}
+.graphToolbar {
+    display: flex;
+    align-items: baseline;
 }
