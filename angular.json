@@ -27,7 +27,11 @@
               "src/material.scss",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+                "node_modules/moment/min/moment.min.js",
+                "node_modules/chart.js/dist/Chart.js",
+                "node_modules/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"
+            ]
           },
           "configurations": {
             "production": {

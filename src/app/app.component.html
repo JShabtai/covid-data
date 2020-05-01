@@ -1,3 +1,5 @@
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.4"></script>
 <div class='testContainer'>
     <!-- Toolbar -->
     <mat-toolbar color='primary' class='toolbar'>
@@ -56,28 +58,35 @@
         <!-- Content -->
         <mat-sidenav-content>
             <div class="content" role="main">
-                <mat-form-field>
-                    <mat-label>Graph type</mat-label>
-                    <mat-select [(value)]='graphType' (selectionChange)='updateChart()'>
-                        <mat-option *ngFor="let g of graphTypes" value="{{g.toLowerCase()}}">{{g}}</mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <mat-form-field>
-                    <mat-label>Data type</mat-label>
-                    <mat-select [(value)]='dataType' (selectionChange)='updateChart()'>
-                        <mat-option *ngFor="let d of dataTypes" value="{{d.toLowerCase()}}">{{d}}</mat-option>
-                    </mat-select>
-                </mat-form-field>
+                <div class='graphToolbar'>
+                    <mat-form-field>
+                        <mat-label>Graph type</mat-label>
+                        <mat-select [(value)]='graphType' (selectionChange)='updateChart()'>
+                            <mat-option *ngFor="let g of graphTypes" value="{{g.toLowerCase()}}">{{g}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field>
+                        <mat-label>Data type</mat-label>
+                        <mat-select [(value)]='dataType' (selectionChange)='updateChart()'>
+                            <mat-option *ngFor="let d of dataTypes" value="{{d.toLowerCase()}}">{{d}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
 
-                <mat-checkbox checked='true' (change)="setPerCapita($event)">
-                    Per 1000 people
-                </mat-checkbox>
+                    <mat-checkbox checked='true' (change)="setPerCapita($event)">
+                        Per 1,000 people
+                    </mat-checkbox>
 
-                <mat-checkbox checked='true' (change)="setOffset100($event)">
-                    Align to 100 cases
-                </mat-checkbox>
+                    <mat-checkbox checked='true' (change)="setOffset100($event)">
+                        Align to 100 cases
+                    </mat-checkbox>
 
-                <canvas id="myChart"></canvas>
+                    <span class="spacer"></span>
+
+                    <button mat-button class='resetZoom' (click)='resetZoom()' [disabled]='!isZoomed'>
+                        <mat-icon>zoom_out_map</mat-icon> Reset zoom
+                    </button>
+                </div>
+                <canvas id="covidChart"></canvas>
                 <!-- TODO Table of summary data -->
             </div>
         </mat-sidenav-content>

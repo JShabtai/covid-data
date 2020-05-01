@@ -11,7 +11,13 @@ import { PopulationService } from './population/population.service';
 import { Dataset, GLOBAL_NAME } from './dataset';
 import { parse } from 'csv-es';
 
-import * as Chart from 'chart.js';
+// The Chart library (and zoom plugin) are included with the angular 'scripts' config.
+// Here we just need the typings, but we don't want to import the module itself otherwise we would
+// use that instance instead of the global one which the zoom plugin installs itself into.
+// So import the module, and alias the type. The module won't actually be included in the build,
+// only the typings will be used at compile time.
+import * as ChartTypings from 'chart.js';
+declare const Chart: typeof ChartTypings;
 
 enum MenuSelection {
     None = '',
@@ -48,6 +54,7 @@ export class AppComponent {
   public selectedCountryList: Dataset[] = [];
 
   public chart: Chart;
+  public isZoomed: boolean = false;
 
   public dataTypes: string[] = ['Confirmed', 'Active', 'Recovered', 'Deaths'];
   public dataType: string = this.dataTypes[0].toLowerCase();
@@ -211,21 +218,50 @@ export class AppComponent {
           perCapita: this.perCapita,
           offset100: this.offset100,
       }));
-      let xLabels = plots.length > 0 ? plots[0].xAxisLabels : [];
+      let xLabels = [];
 
-      if (this.offset100) {
-          for (let plot of plots) {
-              if (plot.xAxisLabels.length > xLabels.length) {
-                  xLabels = plot.xAxisLabels;
-              }
+      for (let plot of plots) {
+          if (plot.xAxisLabels.length > xLabels.length) {
+              xLabels = plot.xAxisLabels;
           }
       }
 
-      const canvas = <HTMLCanvasElement> document.getElementById("myChart");
+      const canvas = <HTMLCanvasElement> document.getElementById("covidChart");
       const ctx = canvas.getContext("2d");
 
       if (this.chart != null) {
           this.chart.destroy();
+      }
+      const xAxes: Chart.ChartXAxe[] = [{
+          scaleLabel: {
+              display: true,
+              labelString: plots.length > 0 ? plots[0].xAxisName : '',
+          },
+      }];
+
+      let tooltips = {};
+
+      if (this.offset100) {
+          xAxes[0].type = 'time';
+          xAxes[0].ticks = {
+              callback: function(value, index, values) {
+                  return String(index);
+              }
+          };
+
+          tooltips= {
+              callbacks: {
+                  title: function(tooltipItems, data) {
+                      return String(tooltipItems[0].index);
+                  }
+              }
+          };
+      }
+      else {
+          xAxes[0].type = 'time';
+          xAxes[0].time = {
+              unit: 'day',
+          }
       }
 
       this.chart = new Chart(ctx, {
@@ -256,7 +292,7 @@ export class AppComponent {
               },
               scales: {
                   yAxes: [{
-                      //type: 'logarithmic',
+                      // type: 'logarithmic',
                       ticks: {
                           suggestedMin: 0,
                       },
@@ -265,14 +301,27 @@ export class AppComponent {
                           labelString: plots.length > 0 ? plots[0].yAxisName : '',
                       }
                   }],
-                  xAxes: [{
-                      scaleLabel: {
-                          display: true,
-                          labelString: plots.length > 0 ? plots[0].xAxisName : '',
-                      }
-                  }]
-              }
-          }
+                  xAxes,
+
+              },
+              plugins: {
+                  zoom: {
+                      pan: {
+                          enabled: false,
+                      },
+                      zoom: {
+                          sensitivity: 0,
+                          enabled: true,
+                          mode: 'xy',
+                          drag: true,
+                          onZoomComplete: (chart) => {
+                              this.isZoomed = true;
+                          }
+                      },
+                  },
+              },
+              tooltips,
+          },
       });
   }
 
@@ -326,18 +375,24 @@ export class AppComponent {
   }
 
   public openHelp() {
-    const dialogRef = this.dialog.open(HelpDialogComponent, {
-      height: '450px',
-      width: '850px',
-      data: {}
-    });
+      const dialogRef = this.dialog.open(HelpDialogComponent, {
+          height: '450px',
+          width: '850px',
+          data: {}
+      });
   }
 
   public openAbout() {
-    const dialogRef = this.dialog.open(AboutDialogComponent, {
-      height: '450px',
-      width: '850px',
-      data: {}
-    });
+      const dialogRef = this.dialog.open(AboutDialogComponent, {
+          height: '450px',
+          width: '850px',
+          data: {}
+      });
+  }
+
+  public resetZoom() {
+      this.isZoomed = false;
+      // Chart typing doesn't include the resetZoom() function added by the plugin
+      (this.chart as any).resetZoom();
   }
 }

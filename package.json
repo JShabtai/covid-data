@@ -30,7 +30,10 @@
     "@angular/router": "~9.0.7",
     "@types/chart.js": "^2.9.19",
     "chart.js": "^2.9.3",
+    "chartjs-plugin-zoom": "^0.7.5",
     "csv-es": "^2.0.2",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.28",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"

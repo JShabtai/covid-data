@@ -1,6 +1,7 @@
 import { PopulationService } from './population/population.service';
 
 export const GLOBAL_NAME = 'Global';
+export const CSV_DATE_FORMAT = 'M/D/YY';
 
 export interface Options {
     perCapita: boolean;
@@ -17,7 +18,7 @@ export interface GraphingData {
     yAxisName: string;
     chartName: string;
 
-    xAxisLabels: string[];
+    xAxisLabels: (number | string )[];
     yAxisData: number[];
 
     name: string;
@@ -47,7 +48,7 @@ export class Dataset {
      * * Doubling time (log(2)/log(average growth over last 7 days))
      */
 
-    public dates: string[];
+    public dates: (string )[];
     public data: {
         [dataType: string]: number[];
     } = {};
@@ -60,7 +61,23 @@ export class Dataset {
     public static CreateFromHeader(populationService: PopulationService, header: string[], record: string[]): Dataset {
         const dataset = new Dataset(populationService);
 
-        dataset.dates = header.slice(Dataset.dataStartColumn);
+        dataset.dates = header.slice(Dataset.dataStartColumn).map((date) => {
+            const parts = date.split('/');
+            let month = parts[0];
+            let day = parts[1];
+            const year = '20' + parts[2]; // Prefix the 2-digit year with '20' to make it complete
+
+            // Pad month and day to 2 digits
+            if (month.length == 1) {
+                month = '0' + month;
+            }
+            if (day.length == 1) {
+                day = '0' + day;
+            }
+
+            // Return an RFC2822 compliant date
+            return `${year}-${month}-${day}`;
+        });
         dataset.country = record[Dataset.countryColumn];
         dataset.province = record[Dataset.provinceColumn] ||"";
 
@@ -225,7 +242,7 @@ export class Dataset {
             returnData.yAxisData = returnData.yAxisData.slice(this.daysTo100);
             returnData.xAxisLabels = new Array(returnData.yAxisData.length);
             for (let i = 0; i < returnData.xAxisLabels.length; i++) {
-                returnData.xAxisLabels[i] = String(i);
+                returnData.xAxisLabels[i] = i;
             }
 
             returnData.xAxisName = 'Days since 100 cases';
