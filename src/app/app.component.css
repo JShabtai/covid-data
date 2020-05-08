@@ -46,35 +46,41 @@ p {
 .mat-checkbox {
     margin-left: 15px;
 }
+
 .mat-form-field {
     margin-left: 15px;
 }
 
-.search {
+.countryListControls {
     position: sticky;
-    padding: 10px 0 10px 0;
+    padding: 10px 0 0px 0;
     top: 0;
     float: initial;
     z-index: 10;
     background-color: white;
 }
 
+.countryListControlDivider {
+    margin-top: 10px;
+}
+
 .selectionButton {
     margin-left: 15px;
 
 }
+
 .sidenavContainer {
     flex: 1;
 }
 
 .content {
     padding: 15px;
-    max-height: calc(100% - 64px - 10px);
 }
 
 .spacer {
     flex: 1 1 auto;
 }
+
 .subregion {
     padding-left: 25px;
     background-color: #eeeeee;
@@ -88,6 +94,7 @@ p {
     padding: 0;
     display: block;
 }
+
 .graphToolbar {
     display: flex;
     align-items: baseline;
