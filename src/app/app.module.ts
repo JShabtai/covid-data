@@ -13,12 +13,14 @@ import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 import { AboutDialogComponent } from './about-dialog/about-dialog.component';
+import { CountryGraphComponent } from './country-graph/country-graph.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HelpDialogComponent,
     AboutDialogComponent,
+    CountryGraphComponent,
   ],
   imports: [
     BrowserModule,
