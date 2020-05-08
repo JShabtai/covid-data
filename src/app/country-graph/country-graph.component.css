@@ -1,0 +1,62 @@
+.testContainer{
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.mat-checkbox {
+    margin-left: 15px;
+}
+
+.mat-form-field {
+    margin-left: 15px;
+}
+
+.countryListControls {
+    position: sticky;
+    padding: 10px 0 0px 0;
+    top: 0;
+    float: initial;
+    z-index: 10;
+    background-color: white;
+}
+
+.countryListControlDivider {
+    margin-top: 10px;
+}
+
+.selectionButton {
+    margin-left: 15px;
+
+}
+
+.sidenavContainer {
+    flex: 1;
+}
+
+.content {
+    padding: 15px;
+}
+
+.subregion {
+    padding-left: 25px;
+    background-color: #eeeeee;
+}
+
+.expandListButton {
+    max-width: 30px;
+    min-width: 30px;
+    width: 30px;
+    margin: 0;
+    padding: 0;
+    display: block;
+}
+
+.graphToolbar {
+    display: flex;
+    align-items: baseline;
+}

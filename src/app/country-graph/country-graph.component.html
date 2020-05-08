@@ -1,0 +1,76 @@
+<mat-sidenav-container class='sidenavContainer'>
+    <!-- Sidebar -->
+    <mat-sidenav class='countryList' [mode]='mobileQuery.matches ? "over" : "side"' opened='true' #sideNav>
+        <div class='countryListControls'>
+            <mat-form-field>
+                <input matInput #searchText placeholder='Search' type='search'>
+            </mat-form-field>
+            <div class='buttons'>
+                <button class='selectionButton' mat-raised-button color='accent' (click)='selectDefault()'>Select default</button>
+                <button class='selectionButton' mat-raised-button color='accent' (click)='deselectAll()'>Deselect all</button>
+            </div>
+            <!-- TODO Advanced filters (population, minimum cases, cases per capita and maybe sorting? -->
+            <mat-divider class='countryListControlDivider'></mat-divider>
+        </div>
+        <mat-selection-list [(ngModel)]='selectedCountryList' (ngModelChange)='onNgModelChange($event)' (change)='onNgModelChange($event)'>
+            <ng-container *ngFor='let c of getCountries()'>
+                <div [hidden]='hideCountry(searchText.value, c.name)'>
+                    <div style='display: flex'>
+                        <button mat-button *ngIf='c.subsets.length >= 2; else no_expand' (click)='c.toggleExpand()' class='expandListButton'>
+                            <mat-icon>
+                                {{c.expand ? 'expand_less' : 'expand_more'}}
+                            </mat-icon>
+                        </button>
+                        <ng-template #no_expand>
+                            <div class='expandListButton'></div>
+                        </ng-template>
+                        <mat-list-option [value]='c'>
+                            {{c.name}}
+                        </mat-list-option>
+                    </div>
+                    <div *ngIf='c.expand' class='subregion'>
+                        <mat-list-option *ngFor='let r of c.subsets' [value]='r'>
+                            {{r.name}}
+                        </mat-list-option>
+                    </div>
+                </div>
+            </ng-container>
+        </mat-selection-list>
+    </mat-sidenav>
+
+    <!-- Content -->
+    <mat-sidenav-content>
+        <div class="content" role="main">
+            <div class='graphToolbar'>
+                <mat-form-field>
+                    <mat-label>Graph type</mat-label>
+                    <mat-select [(value)]='graphType' (selectionChange)='updateChart()'>
+                        <mat-option *ngFor="let g of graphTypes" value="{{g.toLowerCase()}}">{{g}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Data type</mat-label>
+                    <mat-select [(value)]='dataType' (selectionChange)='updateChart()'>
+                        <mat-option *ngFor="let d of dataTypes" value="{{d.toLowerCase()}}">{{d}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-checkbox checked='true' (change)="setPerCapita($event)">
+                    Per 1,000 people
+                </mat-checkbox>
+
+                <mat-checkbox checked='true' (change)="setOffset100($event)">
+                    Align to 100 cases
+                </mat-checkbox>
+
+                <span class="spacer"></span>
+
+                <button mat-button class='resetZoom' (click)='resetZoom()' [disabled]='!isZoomed'>
+                    <mat-icon>zoom_out_map</mat-icon> Reset zoom
+                </button>
+            </div>
+            <canvas id="covidChart"></canvas>
+            <!-- TODO Table of summary data -->
+        </div>
+    </mat-sidenav-content>
+</mat-sidenav-container>
