@@ -1,5 +1,3 @@
-<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.4"></script>
 <div class='testContainer'>
     <!-- Toolbar -->
     <mat-toolbar color='primary' class='toolbar'>
@@ -18,8 +16,8 @@
 
     <mat-sidenav-container class='sidenavContainer'>
         <!-- Sidebar -->
-        <mat-sidenav class='countryList' mode='side' opened='true' #sideNav>
-            <div class='search'>
+        <mat-sidenav class='countryList' [mode]='mobileQuery.matches ? "over" : "side"' opened='true' #sideNav>
+            <div class='countryListControls'>
                 <mat-form-field>
                     <input matInput #searchText placeholder='Search' type='search'>
                 </mat-form-field>
@@ -28,6 +26,7 @@
                     <button class='selectionButton' mat-raised-button color='accent' (click)='deselectAll()'>Deselect all</button>
                 </div>
                 <!-- TODO Advanced filters (population, minimum cases, cases per capita and maybe sorting? -->
+                <mat-divider class='countryListControlDivider'></mat-divider>
             </div>
             <mat-selection-list [(ngModel)]='selectedCountryList' (ngModelChange)='onNgModelChange($event)' (change)='onNgModelChange($event)'>
                 <ng-container *ngFor='let c of getCountries()'>

@@ -1,7 +1,6 @@
 import { PopulationService } from './population/population.service';
 
 export const GLOBAL_NAME = 'Global';
-export const CSV_DATE_FORMAT = 'M/D/YY';
 
 export interface Options {
     perCapita: boolean;
@@ -48,7 +47,7 @@ export class Dataset {
      * * Doubling time (log(2)/log(average growth over last 7 days))
      */
 
-    public dates: (string )[];
+    public dates: string[];
     public data: {
         [dataType: string]: number[];
     } = {};
@@ -71,6 +70,7 @@ export class Dataset {
             if (month.length == 1) {
                 month = '0' + month;
             }
+
             if (day.length == 1) {
                 day = '0' + day;
             }
@@ -242,6 +242,8 @@ export class Dataset {
             returnData.yAxisData = returnData.yAxisData.slice(this.daysTo100);
             returnData.xAxisLabels = new Array(returnData.yAxisData.length);
             for (let i = 0; i < returnData.xAxisLabels.length; i++) {
+                // Note: This has to be a number otherwise the graph gets screwed up,
+                // since Chart.js tries to interpret it as a time.
                 returnData.xAxisLabels[i] = i;
             }
 

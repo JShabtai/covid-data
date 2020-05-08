@@ -1,3 +1,4 @@
+import { MediaMatcher } from '@angular/cdk/layout';
 import { Component, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSidenav } from '@angular/material/sidenav';
@@ -66,11 +67,15 @@ export class AppComponent {
   public perCapita: boolean = true;
   public selectedOptions;
 
+  public mobileQuery: MediaQueryList;
+  private _mobileQueryListener: () => void;
+
   @ViewChild('sideNav') sideNav: MatSidenav;
 
   constructor(
       private dataFetcher: DataFetcherService,
       private populationService: PopulationService,
+      private media: MediaMatcher,
       private dialog: MatDialog,
   ) {
       const observable = new Observable(subscriber => {
@@ -126,6 +131,12 @@ export class AppComponent {
 
           this.countries[global.name] = global;
       });
+
+      this.mobileQuery = media.matchMedia('(max-width: 600px)');
+  }
+
+  protected ngOnDestroy(): void {
+    this.mobileQuery.removeListener(this._mobileQueryListener);
   }
 
   public getCountries(): Dataset[] {
@@ -233,6 +244,9 @@ export class AppComponent {
           this.chart.destroy();
       }
       const xAxes: Chart.ChartXAxe[] = [{
+          // Have to use 'time' even for non-time based graphs because the zoom plugin only
+          // seems to work correctly in that case (otherwise cannot zoom on X, only Y)
+          type: 'time',
           scaleLabel: {
               display: true,
               labelString: plots.length > 0 ? plots[0].xAxisName : '',
@@ -242,7 +256,8 @@ export class AppComponent {
       let tooltips = {};
 
       if (this.offset100) {
-          xAxes[0].type = 'time';
+          // The values which are number of days since 100 cases get interpreted as seconds since
+          // epoch. Override the tooltip and display callbacks to just display the number.
           xAxes[0].ticks = {
               callback: function(value, index, values) {
                   return String(index);
@@ -258,7 +273,6 @@ export class AppComponent {
           };
       }
       else {
-          xAxes[0].type = 'time';
           xAxes[0].time = {
               unit: 'day',
           }
