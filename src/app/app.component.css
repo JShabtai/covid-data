@@ -1,3 +1,4 @@
 .toolbar {
+    position: sticky;
     height: 48px;
 }
