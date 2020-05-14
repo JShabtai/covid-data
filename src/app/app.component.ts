@@ -35,8 +35,11 @@ enum MenuSelection {
 export class AppComponent {
   title = 'covid-data';
 
-  public mobileQuery: MediaQueryList;
   private _mobileQueryListener: () => void;
+
+  public mobileQuery: MediaQueryList;
+
+  public selectedComponent: string = 'countryGraph';
 
   @ViewChild('countryGraph') countryGraph: CountryGraphComponent;
 

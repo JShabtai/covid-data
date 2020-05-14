@@ -38,6 +38,7 @@ export class Dataset {
     public name: string;
 
     public totalConfirmed = 0;
+    public totalConfirmedPerCapita = 0;
     public daysTo100 = 0;
 
     public expand: boolean = false;
@@ -105,7 +106,8 @@ export class Dataset {
      */
     public analyze() {
         if (this.data['confirmed']) {
-            this.totalConfirmed = this.data['confirmed'][this.data['confirmed'].length - 1]
+            this.totalConfirmed = this.data['confirmed'][this.data['confirmed'].length - 1];
+            this.totalConfirmedPerCapita = 1000 * this.totalConfirmed / this.population();
 
             this.daysTo100 = this.data['confirmed'].length;
             for (let i = 0; i < this.data['confirmed'].length; i++) {
