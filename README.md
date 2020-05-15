@@ -1,6 +1,10 @@
 # CovidData
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.0.7.
+## See it in action
+
+Check out this tool at [covid.shabtai.ca](https://covid.shabtai.ca)
+
+![Screenshot](https://github.com/JShabtai/covid-data/blob/master/screenshot.png?raw=true)
 
 ## Requirements
 
