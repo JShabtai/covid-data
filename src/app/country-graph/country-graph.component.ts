@@ -10,7 +10,7 @@ import { HelpDialogComponent } from '../help-dialog/help-dialog.component';
 import { DataFetcherService } from '../data-fetcher.service';
 import { PopulationService } from '../population/population.service';
 import { Dataset, GLOBAL_NAME } from '../dataset';
-import { parse } from 'csv-es';
+import { parse } from '@vanillaes/csv';
 
 // The Chart library (and zoom plugin) are included with the angular 'scripts' config.
 // Here we just need the typings, but we don't want to import the module itself otherwise we would
