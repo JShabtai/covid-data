@@ -1029,6 +1029,11 @@
     "@types/source-list-map" "*"
     source-map "^0.6.1"
 
+"@vanillaes/csv@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@vanillaes/csv/-/csv-2.1.1.tgz#fccddd88ed4d09de29f75a68190d2bf5ab5ab9ce"
+  integrity sha512-lyaDMDkSjRRCan/cVJzbFNzRxaTmaNr2Lcy6dJvkgzFtY5hZitdEkLoaTKKL0TWvV0z9ON1IcY+Rlmoz7lASSw==
+
 "@webassemblyjs/ast@1.8.5":
   version "1.8.5"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.8.5.tgz#51b1c5fe6576a34953bf4b253df9f0d490d9e359"
@@ -2684,11 +2689,6 @@ csso@^4.0.2:
   integrity sha512-NL3spysxUkcrOgnpsT4Xdl2aiEiBG6bXswAABQVHcMrfjjBisFOKwLDOmf4wf32aPdcJws1zds2B0Rg+jqMyHQ==
   dependencies:
     css-tree "1.0.0-alpha.39"
-
-csv-es@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/csv-es/-/csv-es-2.0.2.tgz#fdae7a88c7a0957c1079215536b7d1c44b2ed711"
-  integrity sha512-dZ/0T3T1kyaUiTK3x3ERYmghDdwrqHWJnNV+5TDdy0jjZeG8FnY7pM9WVnVTNTmh7b4kU9ILpSc0qYlUv73HpQ==
 
 custom-event@~1.0.0:
   version "1.0.1"
