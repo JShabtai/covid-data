@@ -9,7 +9,7 @@ import { AboutDialogComponent } from '../about-dialog/about-dialog.component';
 import { HelpDialogComponent } from '../help-dialog/help-dialog.component';
 import { DataFetcherService } from '../data-fetcher.service';
 import { PopulationService } from '../population/population.service';
-import { Dataset, GLOBAL_NAME } from '../dataset';
+import { Dataset } from '../dataset';
 import { parse } from '@vanillaes/csv';
 
 // The Chart library (and zoom plugin) are included with the angular 'scripts' config.
@@ -94,27 +94,12 @@ export class CountryGraphComponent implements OnInit {
     }
 
     public getCountries(): Dataset[] {
-        return Object.keys(this.dataFetcher.countries).sort((first, second) => {
-            if (first === GLOBAL_NAME) {
-                return -1;
-            }
-            else if (second === GLOBAL_NAME) {
-                return 1;
-            }
-            else {
-                if (first < second) {
-                    return -1;
-                }
-                else if (second < first) {
-                    return 1;
-                }
-                else {
-                    return 0;
-                }
-            }
-        }).map((country) => {
-            return this.dataFetcher.countries[country];
-        });
+        if (this.dataFetcher.allData == null) {
+            return [];
+        }
+
+        // TODO Using spread outside of first element is sloww
+        return [this.dataFetcher.allData, ...this.dataFetcher.allData.subsets];
     }
 
     public updateChart() {
@@ -123,6 +108,7 @@ export class CountryGraphComponent implements OnInit {
             perCapita: this.perCapita,
             offset100: this.offset100,
         }));
+        console.log(plots);
         let xLabels = [];
 
         for (let plot of plots) {
@@ -251,7 +237,7 @@ export class CountryGraphComponent implements OnInit {
             'Spain',
             'US',
             'United Kingdom',
-        ].sort().map(name => this.dataFetcher.countries[name]);
+        ].sort().map(name => this.dataFetcher.allData.subsets.find(dataset => dataset.name === name));
 
         this.updateChart();
     }

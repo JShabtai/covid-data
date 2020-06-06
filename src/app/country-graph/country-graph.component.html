@@ -16,7 +16,7 @@
             <ng-container *ngFor='let c of getCountries()'>
                 <div [hidden]='hideCountry(searchText.value, c.name)'>
                     <div style='display: flex'>
-                        <button mat-button *ngIf='c.subsets.length >= 2; else no_expand' (click)='c.toggleExpand()' class='expandListButton'>
+                        <button mat-button *ngIf='c.subsets.length > 1; else no_expand' (click)='c.toggleExpand()' class='expandListButton'>
                             <mat-icon>
                                 {{c.expand ? 'expand_less' : 'expand_more'}}
                             </mat-icon>

@@ -2,6 +2,21 @@ import { PopulationService } from './population/population.service';
 
 export const GLOBAL_NAME = 'Global';
 
+export interface Datapoint extends Record<string, number | undefined> {
+    confirmed: number;
+    recovered: number;
+    deaths: number;
+    active?: number;
+};
+
+type TimeSeriesData = Record<string, Datapoint>;
+
+export interface DatasetInterface {
+    name: string;
+    data: TimeSeriesData;
+    subsets: Record<string, DatasetInterface>;
+}
+
 export interface Options {
     perCapita: boolean;
     smoothingFactor: number;
@@ -23,19 +38,15 @@ export interface GraphingData {
     name: string;
 }
 
-export class Dataset {
-    private static readonly countryColumn = 1;
-    private static readonly provinceColumn = 0;
-    private static readonly dataStartColumn = 4;
 
+export class Dataset {
     /**
      * Smaller regions which this one is made up of (e.g. provinces in a country)
      */
     public subsets: Dataset[] = [];
 
-    public country: string;
-    public province: string;
     public name: string;
+    public parentName: string | null;
 
     public totalConfirmed = 0;
     public totalConfirmedPerCapita = 0;
@@ -43,60 +54,38 @@ export class Dataset {
 
     public expand: boolean = false;
 
-    /**
-     * TODOs
-     * * Doubling time (log(2)/log(average growth over last 7 days))
-     */
-
     public dates: string[];
-    public data: {
-        [dataType: string]: number[];
-    } = {};
+
+    public data: TimeSeriesData = {};
 
     constructor(
         private populationService: PopulationService,
+        dataset: DatasetInterface,
+        parentName: string = null,
     ) {
-    }
+        this.name = dataset.name;
+        this.parentName = parentName;
 
-    public static CreateFromHeader(populationService: PopulationService, header: string[], record: string[]): Dataset {
-        const dataset = new Dataset(populationService);
+        this.data= dataset.data;
+        this.dates = Object.keys(this.data).sort();
 
-        dataset.dates = header.slice(Dataset.dataStartColumn).map((date) => {
-            const parts = date.split('/');
-            let month = parts[0];
-            let day = parts[1];
-            const year = '20' + parts[2]; // Prefix the 2-digit year with '20' to make it complete
+        for (let name of Object.keys(dataset.subsets).sort()) {
+            const subset = new Dataset(populationService, dataset.subsets[name], this.name)
 
-            // Pad month and day to 2 digits
-            if (month.length == 1) {
-                month = '0' + month;
+            if (subset.totalConfirmed <= 0) {
+                continue;
             }
 
-            if (day.length == 1) {
-                day = '0' + day;
+            this.subsets.push(subset);
+
+            if (this.parentName == null) {
+                this.populationService.addCountryToGlobe(name);
             }
-
-            // Return an RFC2822 compliant date
-            return `${year}-${month}-${day}`;
-        });
-        dataset.country = record[Dataset.countryColumn];
-        dataset.province = record[Dataset.provinceColumn] ||"";
-
-
-        if (dataset.province.length > 0) {
-            dataset.name = `${dataset.province}`;
-        }
-        else {
-            dataset.name = dataset.country;
         }
 
-        return dataset;
+        this.analyze();
     }
 
-    public addData(dataType: string, header: string[], record: string[]) {
-        this.data[dataType] = record.slice(Dataset.dataStartColumn).map(count => Number(count));
-        this.analyze()
-    }
 
     /**
      * Perform certain analysis if all data is now present:
@@ -105,72 +94,39 @@ export class Dataset {
      * - Number of days to 100 cases
      */
     public analyze() {
-        if (this.data['confirmed']) {
-            this.totalConfirmed = this.data['confirmed'][this.data['confirmed'].length - 1];
-            this.totalConfirmedPerCapita = 1000 * this.totalConfirmed / this.population();
+        // TODO Check that sort order is right
+        let lastDay = Object.keys(this.data).sort().reverse()[0];
+        this.totalConfirmed = this.data[lastDay].confirmed;
+        this.totalConfirmedPerCapita = 1000 * this.totalConfirmed / this.population();
 
-            this.daysTo100 = this.data['confirmed'].length;
-            for (let i = 0; i < this.data['confirmed'].length; i++) {
-                if (this.data['confirmed'][i] >= 100) {
-                    this.daysTo100 = i;
-                    break;
-                }
+        this.daysTo100 = this.dates.length;
+        for (let i = 0; i < this.dates.length; i++) {
+            if (this.data[this.dates[i]].confirmed >= 100) {
+                this.daysTo100 = i;
+                break;
             }
+        }
 
-            if (this.data['recovered'] && this.data['deaths']) {
-                this.data['active'] = [...this.data['confirmed']];
-                for (let i = 0; i < this.data['active'].length; i++) {
-                    this.data['active'][i] -= this.data['recovered'][i];
-                    this.data['active'][i] -= this.data['deaths'][i];
-                }
-            }
+        for (let date of this.dates) {
+            const datapoint = this.data[date];
+            datapoint.active = datapoint.confirmed - datapoint.recovered - datapoint.deaths;
         }
     }
 
-    public addDataset(dataset: Dataset, trackSubset: boolean = true): void {
-        // For some reason there are rows for the province of 'Recovered' in Canada with no data. Ignore them.
-        if (dataset.name === 'Recovered') {
-            return;
+    private getDataArrays(dataType: string):  number[]  {
+        const ret: number[] = [];
+
+        for (let date of this.dates) {
+            ret.push(this.data[date][dataType]);
         }
 
-        if (this.country == null) {
-            this.dates = [...dataset.dates];
-            this.country = dataset.country;
-            this.name = dataset.country;
-
-            for (let dataType of Object.keys(dataset.data)) {
-                this.data[dataType] = [...dataset.data[dataType]];
-            }
-        }
-        else {
-            for (let dataType of Object.keys(dataset.data)) {
-                if (this.data[dataType] instanceof Array) {
-                    for (let i = 0; i < dataset.data[dataType].length; i++) {
-                        this.data[dataType][i] += dataset.data[dataType][i];
-                    }
-                }
-                else {
-                    this.data[dataType] = [...dataset.data[dataType]];
-                }
-            }
-        }
-
-        this.analyze();
-
-        this.province = '';
-
-        // Canada only has a row for number of recoveries at the national level. We want to include this
-        // data, but don't want to have 'Canada' as a subset of itself.
-        if (dataset.name === 'Canada' || !trackSubset) {
-            return;
-        }
-        this.subsets.push(dataset);
-
+        return ret;
     }
+
     public getRatiosSmooth(dataType: string, options: Options): GraphingData {
-        const workingData = this.data[dataType] || [];
+        const workingData = this.getDataArrays(dataType);
         let ratios = [];
-        for (let i = options.smoothingFactor; i < workingData.length; i++) {
+        for (let i = options.smoothingFactor; i < this.dates.length; i++) {
             ratios.push(100 * (
                 Math.pow(
                     workingData[i]/workingData[i-options.smoothingFactor],
@@ -190,7 +146,7 @@ export class Dataset {
     }
 
     public getDaily(dataType: string, options: Options): GraphingData {
-        const workingData = this.data[dataType] || [];
+        const workingData = this.getDataArrays(dataType);
         let perCapitaFactor = options.perCapita ? 1000/this.population() : 1;
         return {
             xAxisName: 'Date',
@@ -205,10 +161,10 @@ export class Dataset {
     }
 
     public getChange(dataType: string, options: Options): GraphingData {
-        const workingData = this.data[dataType] || [];
+        const workingData = this.getDataArrays(dataType);
         let differences = [];
         let perCapitaFactor = options.perCapita ? 1000/this.population() : 1;
-        for (let i = options.smoothingFactor; i < workingData.length; i++) {
+        for (let i = options.smoothingFactor; i < this.dates.length; i++) {
             differences.push(perCapitaFactor * (workingData[i] - workingData[i-options.smoothingFactor] ) / options.smoothingFactor);
         }
         return {
@@ -260,14 +216,15 @@ export class Dataset {
     }
 
     public population(): number {
-        if (this.name === GLOBAL_NAME) {
+        if (this.parentName == null) {
+            console.log('getting global pop');
             return this.populationService.getGlobalPopulation();
         }
-        else if (this.province != '' || this.name==='California') {
-            return this.populationService.getRegionPopulation(this.country, this.province);
+        else if (this.parentName === GLOBAL_NAME) {
+            return this.populationService.getCountryPopulation(this.name);
         }
         else {
-            return this.populationService.getCountryPopulation(this.country);
+            return this.populationService.getRegionPopulation(this.parentName, this.name);
         }
     }
 }

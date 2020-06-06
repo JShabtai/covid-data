@@ -48,3 +48,5 @@ Thumbs.db
 # Ignore downloaded data files
 /src/assets/time_series_covid19_*.csv
 /src/assets/population.json
+/src/assets/alldata.json
+/src/assets/alldata.json.gz
