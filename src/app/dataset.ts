@@ -94,8 +94,7 @@ export class Dataset {
      * - Number of days to 100 cases
      */
     public analyze() {
-        // TODO Check that sort order is right
-        let lastDay = Object.keys(this.data).sort().reverse()[0];
+        let lastDay = this.dates[this.dates.length - 1];
         this.totalConfirmed = this.data[lastDay].confirmed;
         this.totalConfirmedPerCapita = 1000 * this.totalConfirmed / this.population();
 
@@ -217,7 +216,6 @@ export class Dataset {
 
     public population(): number {
         if (this.parentName == null) {
-            console.log('getting global pop');
             return this.populationService.getGlobalPopulation();
         }
         else if (this.parentName === GLOBAL_NAME) {

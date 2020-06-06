@@ -98,7 +98,6 @@ export class CountryGraphComponent implements OnInit {
             return [];
         }
 
-        // TODO Using spread outside of first element is sloww
         return [this.dataFetcher.allData, ...this.dataFetcher.allData.subsets];
     }
 
@@ -108,7 +107,6 @@ export class CountryGraphComponent implements OnInit {
             perCapita: this.perCapita,
             offset100: this.offset100,
         }));
-        console.log(plots);
         let xLabels = [];
 
         for (let plot of plots) {
