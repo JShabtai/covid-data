@@ -22,8 +22,9 @@ export class DataFetcherService {
     ) { }
 
     private fetchAllData() {
-        // TODO Download gzipped data
-        return this.http.get(`/assets/alldata.json`, { responseType: "json" });
+        return this.http.get(`/assets/covid.100.json`, {
+            responseType: "json"
+        });
     }
 
     public fetchData(): Observable<object> {

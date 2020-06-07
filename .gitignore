@@ -50,3 +50,5 @@ Thumbs.db
 /src/assets/population.json
 /src/assets/alldata.json
 /src/assets/alldata.json.gz
+/src/assets/covid.*.json
+/src/assets/covid.*.json.gz
