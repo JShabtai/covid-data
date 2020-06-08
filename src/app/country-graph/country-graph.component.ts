@@ -227,6 +227,13 @@ export class CountryGraphComponent implements OnInit {
     }
 
     public selectDefault() {
+        if (this.dataFetcher.allData == null) {
+            // This shouldn't be called until we have data, but sometimes that's not the case
+            // and I'm not sure why. In the meantime, just retry every 300ms until we do have data.
+            setTimeout(this.selectDefault.bind(this), 300);
+            return;
+        }
+
         // Must be alphabetical order or colours will be shuffled once the sidebar is used
         this.selectedCountryList = [
             'Canada',

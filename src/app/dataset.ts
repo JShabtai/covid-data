@@ -181,13 +181,13 @@ export class Dataset {
     public getData(graphType: string, dataType: string, options: Options): GraphingData {
         let returnData: GraphingData;
         switch (graphType) {
-            case 'ratio': 
+            case 'ratio':
                 returnData = this.getRatiosSmooth(dataType, options);
                 break;
-            case 'daily': 
+            case 'daily':
                 returnData = this.getDaily(dataType, options);
                 break;
-            case 'change': 
+            case 'change':
                 returnData = this.getChange(dataType, options);
                 break;
 
@@ -208,6 +208,10 @@ export class Dataset {
         }
 
         return returnData;
+    }
+
+    public canExpand(): boolean {
+        return this.subsets.length > 0 && this.name != GLOBAL_NAME;
     }
 
     public toggleExpand() {
