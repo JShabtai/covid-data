@@ -3,8 +3,11 @@
     <mat-sidenav class='countryList' [mode]='mobileQuery.matches ? "over" : "side"' opened='true' #sideNav>
         <div class='countryListControls'>
             <mat-form-field>
-                <input matInput #searchText placeholder='Search' type='search'>
+                <input matInput #searchText placeholder='Search' type='search' />
             </mat-form-field>
+            <button mat-icon-button color='accent' (click)='selectDefault()'>
+                <mat-icon class='clearSearch' (click)='searchText.value=""'>clear</mat-icon>
+            </button>
             <div class='buttons'>
                 <button class='selectionButton' mat-raised-button color='accent' (click)='selectDefault()'>Select default</button>
                 <button class='selectionButton' mat-raised-button color='accent' (click)='deselectAll()'>Deselect all</button>
@@ -28,7 +31,7 @@
                             {{c.name}}
                         </mat-list-option>
                     </div>
-                    <div *ngIf='c.expand' class='subregion'>
+                    <div [hidden]='!c.expand' class='subregion'>
                         <mat-list-option *ngFor='let r of c.subsets' [value]='r'>
                             {{r.name}}
                         </mat-list-option>
