@@ -77,7 +77,7 @@
             </div>
             <div [hidden]='!chartDescription || chartDescription == ""'>
                 <mat-card>
-                    {{chartDescription}}
+                    <div [innerHTML]='chartDescription'></div>
                 </mat-card>
             </div>
             <canvas id="covidChart"></canvas>
