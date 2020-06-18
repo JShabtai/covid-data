@@ -47,14 +47,17 @@
             <div class='graphToolbar'>
                 <mat-form-field>
                     <mat-label>Graph type</mat-label>
-                    <mat-select [(value)]='graphType' (selectionChange)='updateChart()'>
-                        <mat-option *ngFor="let g of graphTypes" value="{{g.toLowerCase()}}">{{g}}</mat-option>
+                    <mat-select [(value)]='graphType' (selectionChange)='updateChart()' [disabled]='advancedDataTypes.includes(dataType)'>
+                        <mat-option *ngFor="let g of graphTypes" value="{{g}}">{{g}}</mat-option>
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field>
                     <mat-label>Data type</mat-label>
                     <mat-select [(value)]='dataType' (selectionChange)='updateChart()'>
-                        <mat-option *ngFor="let d of dataTypes" value="{{d.toLowerCase()}}">{{d}}</mat-option>
+                        <mat-option disabled>Basic Graphs</mat-option>
+                        <mat-option *ngFor="let d of basicDataTypes" value="{{d}}">{{d}}</mat-option>
+                        <mat-option disabled>Advanced Graphs</mat-option>
+                        <mat-option *ngFor="let d of advancedDataTypes" value="{{d}}">{{d}}</mat-option>
                     </mat-select>
                 </mat-form-field>
 
@@ -71,6 +74,11 @@
                 <button mat-button class='resetZoom' (click)='resetZoom()' [disabled]='!isZoomed'>
                     <mat-icon>zoom_out_map</mat-icon> Reset zoom
                 </button>
+            </div>
+            <div [hidden]='!chartDescription || chartDescription == ""'>
+                <mat-card>
+                    {{chartDescription}}
+                </mat-card>
             </div>
             <canvas id="covidChart"></canvas>
             <!-- TODO Table of summary data -->
