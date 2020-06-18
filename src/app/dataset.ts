@@ -198,8 +198,11 @@ export class Dataset {
             yAxisData: data,
 
             name: this.name,
-            description: `This shows the number of new confirmed cases as a percentage of the current active cases. 
-            This is intended to see how quickly the COVID is spreading, and how effective regional measures are at reducing spread.`
+            description: `This shows the number of new confirmed cases as a percentage of the current active cases. <br />
+            This is intended to see how quickly the COVID is spreading, and how effective regional measures are at reducing spread. <br />
+            <b>Note</b>: This graph will only be useful if the dataset has recovered data. In some datasets
+            (namely individual states in the US) the recovered data is always 0, making this graph
+            virtually useless for those datasets.`
         };
     }
 
