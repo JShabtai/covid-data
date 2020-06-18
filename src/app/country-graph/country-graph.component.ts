@@ -51,14 +51,17 @@ export class CountryGraphComponent implements OnInit {
     public menuOpen = true;
     public selectedCountryList: Dataset[] = [];
 
+    public chartDescription: string;
+
     public chart: Chart;
     public isZoomed: boolean = false;
 
-    public dataTypes: string[] = ['Confirmed', 'Active', 'Recovered', 'Deaths'];
-    public dataType: string = this.dataTypes[0].toLowerCase();
+    public basicDataTypes: string[] = ['Confirmed', 'Active', 'Recovered', 'Deaths'];
+    public advancedDataTypes: string[] = ['New Confirmed per active'];
+    public dataType: string = this.basicDataTypes[0];
 
     public graphTypes: string[] = ['Daily', 'Change', 'Ratio'];
-    public graphType: string = this.graphTypes[0].toLowerCase();
+    public graphType: string = this.graphTypes[0];
     public offset100: boolean = true;
 
     public perCapita: boolean = true;
@@ -102,12 +105,19 @@ export class CountryGraphComponent implements OnInit {
     }
 
     public updateChart() {
-        const plots = this.selectedCountryList.map(c => c.getData(this.graphType, this.dataType, {
+        const plots = this.selectedCountryList.map(c => c.getData(this.graphType.toLowerCase(), this.dataType.toLowerCase(), {
             smoothingFactor: 7,
             perCapita: this.perCapita,
             offset100: this.offset100,
         }));
         let xLabels = [];
+
+        if (plots.length > 0) {
+            this.chartDescription = plots[0].description;
+        }
+        else {
+            this.chartDescription = '';
+        }
 
         for (let plot of plots) {
             if (plot.xAxisLabels.length > xLabels.length) {

@@ -36,6 +36,8 @@ export interface GraphingData {
     yAxisData: number[];
 
     name: string;
+
+    description?: string;
 }
 
 
@@ -178,21 +180,50 @@ export class Dataset {
         };
     }
 
+    public deltaConfirmedActiveRatio(options: Options): GraphingData {
+        const active = this.getDataArrays('active');
+        const confirmed = this.getDataArrays('confirmed');
+        let data = [0];
+        let perCapitaFactor = options.perCapita ? 1000/this.population() : 1;
+        for (let i = 1; i < this.dates.length; i++) {
+            data.push(100 * (confirmed[i] - confirmed[i-1] ) / active[i]);
+        }
+
+        return {
+            xAxisName: 'Date',
+            yAxisName: `New cases per confirmed case (%)`,
+            chartName: `Change in daily confirmed cases per current active case`,
+
+            xAxisLabels: this.dates,
+            yAxisData: data,
+
+            name: this.name,
+            description: `This shows the number of new confirmed cases as a percentage of the current active cases. 
+            This is intended to see how quickly the COVID is spreading, and how effective regional measures are at reducing spread.`
+        };
+    }
+
     public getData(graphType: string, dataType: string, options: Options): GraphingData {
         let returnData: GraphingData;
-        switch (graphType) {
-            case 'ratio':
-                returnData = this.getRatiosSmooth(dataType, options);
-                break;
-            case 'daily':
-                returnData = this.getDaily(dataType, options);
-                break;
-            case 'change':
-                returnData = this.getChange(dataType, options);
-                break;
 
-            default:
-                throw new Error(`Graph type '${graphType}' does not exist`);
+        if (dataType === 'new confirmed per active') {
+            returnData = this.deltaConfirmedActiveRatio(options);
+        }
+        else {
+            switch (graphType) {
+                case 'ratio':
+                    returnData = this.getRatiosSmooth(dataType, options);
+                    break;
+                case 'daily':
+                    returnData = this.getDaily(dataType, options);
+                    break;
+                case 'change':
+                    returnData = this.getChange(dataType, options);
+                    break;
+
+                default:
+                    throw new Error(`Graph type '${graphType}' does not exist`);
+            }
         }
 
         if (options.offset100) {
