@@ -7,6 +7,7 @@ export interface Datapoint extends Record<string, number | undefined> {
     recovered: number;
     deaths: number;
     active?: number;
+    pseudoActive?: number;
 };
 
 type TimeSeriesData = Record<string, Datapoint>;
@@ -40,6 +41,9 @@ export interface GraphingData {
     description?: string;
 }
 
+// The number of day to use when calculating pseudo-active cases.
+// Pseudo active of day X is confirmed[X] - confirmed[X-PSEUDO_ACTIVE_DAYS]
+const PSEUDO_ACTIVE_DAYS = 14;
 
 export class Dataset {
     /**
@@ -108,17 +112,33 @@ export class Dataset {
             }
         }
 
-        for (let date of this.dates) {
+        for (let i = 0; i < this.dates.length; i++) {
+            const date = this.dates[i];
             const datapoint = this.data[date];
             datapoint.active = datapoint.confirmed - datapoint.recovered - datapoint.deaths;
+
+            if (i < PSEUDO_ACTIVE_DAYS) {
+                datapoint.pseudoActive = datapoint.confirmed;
+            }
+            else {
+                const oldDate = this.dates[i-PSEUDO_ACTIVE_DAYS];
+                let oldDatapoint = this.data[oldDate];
+                datapoint.pseudoActive = datapoint.confirmed - oldDatapoint.confirmed;
+            }
         }
     }
 
     private getDataArrays(dataType: string):  number[]  {
+        let dataKey = dataType;
+
+        if (dataType === 'pseudo active') {
+            dataKey = 'pseudoActive'
+        }
+
         const ret: number[] = [];
 
         for (let date of this.dates) {
-            ret.push(this.data[date][dataType]);
+            ret.push(this.data[date][dataKey]);
         }
 
         return ret;
@@ -239,6 +259,10 @@ export class Dataset {
             }
 
             returnData.xAxisName = 'Days since 100 cases';
+        }
+
+        if (dataType === 'pseudo active') {
+            returnData.description = `"Pseudo active" is intended to be used as a substitute for 'Active' where accurate active data is not available. This dataset is an approximation made by looking at the number of new cases in the last 14 days. The theory being that, on average, cases are resolved in this time period. It is only an approximation, but should be helpful in places with inaccurate or no data for current active cases.`
         }
 
         return returnData;
