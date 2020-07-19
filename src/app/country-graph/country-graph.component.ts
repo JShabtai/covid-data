@@ -56,7 +56,7 @@ export class CountryGraphComponent implements OnInit {
     public chart: Chart;
     public isZoomed: boolean = false;
 
-    public basicDataTypes: string[] = ['Confirmed', 'Active', 'Recovered', 'Deaths'];
+    public basicDataTypes: string[] = ['Confirmed', 'Active', 'Recovered', 'Deaths', 'Pseudo Active'];
     public advancedDataTypes: string[] = ['New Confirmed per active'];
     public dataType: string = this.basicDataTypes[0];
 
