@@ -22,7 +22,7 @@ export class DataFetcherService {
     ) { }
 
     private fetchAllData() {
-        return this.http.get(`/assets/covid.100.json`, {
+        return this.http.get(`/assets/covid.all.json`, {
             responseType: "json"
         });
     }

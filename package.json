@@ -11,7 +11,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "updateCovidData": "cd src/assets; wget -N 'https://raw.githubusercontent.com/JShabtai/CovidDataJSON/data/data/covid.100.json'",
+    "updateCovidData": "cd src/assets; wget -N 'https://raw.githubusercontent.com/JShabtai/CovidDataJSON/data/data/covid.all.json'",
     "updatePopData": "wget -N https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-population.json -O src/app/population/data/countries.json",
     "updateData": "npm run updateCovidData; npm run updatePopData"
   },
