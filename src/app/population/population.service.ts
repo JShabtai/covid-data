@@ -3,6 +3,11 @@ import { Injectable } from '@angular/core';
 import countryArray from './data/countries.json';
 import { RegionPopulations } from './data/regions'
 
+interface Country {
+    country: string;
+    population: string | number;
+}
+
 /**
  * This is not terribly useful, but in cases where no data is available it makes per-capita graphs
  * less absurd.
@@ -23,7 +28,7 @@ export class PopulationService {
     private globalCountries: Set<string> = new Set<string>();
 
     constructor() {
-        for (let country of countryArray) {
+        for (let country of (countryArray as Country[])) {
             this.countries[country.country] = Number(country.population);
         }
     }
