@@ -62,7 +62,7 @@ export class CountryGraphComponent implements OnInit {
 
     public graphTypes: string[] = ['Daily', 'Change', 'Ratio'];
     public graphType: string = this.graphTypes[0];
-    public offset100: boolean = true;
+    public offset100: boolean = false;
 
     public perCapita: boolean = true;
     public selectedOptions;
