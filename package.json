@@ -29,7 +29,7 @@
     "@angular/router": "~9.0.7",
     "@types/chart.js": "^2.9.19",
     "@vanillaes/csv": "^2.1.1",
-    "chart.js": "^2.9.3",
+    "chart.js": "^2.9.4",
     "chartjs-plugin-zoom": "^0.7.5",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.28",
